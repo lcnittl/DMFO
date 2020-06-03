@@ -2,7 +2,8 @@
 
 This is a set of scripts that enable convenient diff and merge of Office-related file
 types (currently only Word, future support for Excel and PowerPoint is planned). The
-office application will be started using COM automation.
+office application will be started using COM automation, thus an Office installation is
+required.
 
 DMFO is LFS compatible.
 
@@ -10,11 +11,11 @@ DMFO is LFS compatible.
 
 ### Git Integration
 
-These tools are intended to use with git, so that `git diff` and `git merge` will use
-Office applications compare and "merge" files.
+These tools are intended to be used with Git, so that `git diff` and `git merge` will
+use Office applications to compare and "merge" files.
 
-Usage requires the configuration of `.gitattributes` and `.gitconfig` to support a
-custom diff and merge driver.
+Usage requires the configuration of `.gitattributes` and `.gitconfig` to support the
+DMFO diff and merge driver.
 
 #### `.gitconfig`
 
@@ -27,7 +28,7 @@ Add the following drivers to your git config file:
 	binary = true
 [merge "dmfo"]
 	name = DMFO merge driver
-	driver = "powershell.exe -File ~<pathToDMFO>/dmfo-merge.ps1 %O %A %B %L %P"
+	driver = "powershell.exe -File <pathToDMFO>/dmfo-merge.ps1 %O %A %B %L %P"
 	binary = true
 ```
 
@@ -35,8 +36,8 @@ Replace `<pathToDMFO>` with the repo's path.
 
 #### `.gitattributes`
 
-Specify the following drivers in your `.gitattributes` file (currently DMFO only
-supports Word files):
+Specify the following drivers in your `.gitattributes` file (currently DMFO is only
+supporting Word files):
 
 ```
 *.docx diff=dmfo merge=dmfo
