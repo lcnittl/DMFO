@@ -25,7 +25,11 @@ as usual and with any paramter they accept.
 
 #### `.gitconfig`
 
-Add the following drivers to your git config file:
+Simply register the diff and merge drivers by running [`reg_dmfo_drivers.ps1`][register]
+(scope can be given as parameter `--local`, `--global` or `--system`, default is
+`--global`).
+
+Alternatively, add the entries manually to your git config:
 
 ```ini
 [diff "dmfo"]
@@ -80,3 +84,4 @@ Inspired by [ExtDiff][extdiff].
 
 [copying]: COPYING
 [extdiff]: https://github.com/ForNeVeR/ExtDiff
+[register]: reg_dmfo_drivers.ps1
