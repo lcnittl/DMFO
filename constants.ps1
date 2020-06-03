@@ -24,3 +24,8 @@ enum WdWindowState {
     wdWindowStateMaximize = 1  # Maximized.
     wdWindowStateMinimize = 2  # Minimized.
 }
+enum WdCompareDestination {
+    # wdCompareDestinationOriginal = 0  #Tracks the differences between the two files using tracked changes in the original document.
+    wdCompareDestinationRevised = 1  #Tracks the differences between the two files using tracked changes in the revised document.
+    wdCompareDestinationNew = 2  #Creates a new file and tracks the differences between the original document and the revised document using tracked changes.
+}

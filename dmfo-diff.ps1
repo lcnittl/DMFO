@@ -17,13 +17,14 @@ $activity = "Preparing files... "
 $complete = 0
 Write-Progress -Activity $activity -Status "Initializing" -PercentComplete $complete
 $FileNames = @{
-    Local = $LocalFileName;
-    Remote = $RemoteFileName
+    LOCAL = $LocalFileName;
+    REMOTE = $RemoteFileName
 }
+$Files = @{}
 $complete += 20
 
 foreach ($key in @($FileNames.Keys)) {
-    Write-Progress -Activity $activity -Status "Preparing $FileNames[$key]" -PercentComplete $complete
+    Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
     $FileName = (Resolve-Path $FileNames[$key]).Path
     $FileNames[$key] = $FileName
     git lfs pointer --check --file $FileName
@@ -51,42 +52,55 @@ Write-Progress -Activity $activity -Status "Initializing COM object" -PercentCom
 try {
     $COMObj = New-Object -ComObject "Word.Application"
     $COMObj.Visible = $false
-    $complete += 40
+    $complete += 20
 } catch [Runtime.Interopservices.COMException] {
     Write-Host "You must have Microsoft Word installed to perform this operation."
     exit(1)
 }
 try {
-    Write-Progress -Activity $activity -Status "Opening LOCAL" -PercentComplete $complete
-    $LocalFile = $COMObj.Documents.Open(
-        [ref]$FileNames["Local"],  # FileName
-        [ref]$false,  # ConfirmConversions
-        [ref]$false,  # ReadOnly
-        [ref]$false  # AddToRecentFiles
-    )
-    $complete += 20
+    foreach ($key in $FileNames.Keys) {
+        Write-Progress -Activity $activity -Status "Opening $key" -PercentComplete $complete
+        $File = $COMObj.Documents.Open(
+            [ref]$FileNames[$key],  # FileName
+            [ref]$false,  # ConfirmConversions
+            [ref]$false,  # ReadOnly
+            [ref]$false  # AddToRecentFiles
+        )
+        $Files += @{$key = $File}
+        $complete += 15
+    }
 
     Write-Progress -Activity $activity -Status "Diffing REMOTE vs LOCAL" -PercentComplete $complete
-    $LocalFile.Compare(
-        [ref]$FileNames["Remote"],  # Name
-        [ref]"REMOTE",  # AuthorName
-        [ref][WdCompareTarget]::wdCompareTargetNew,  # CompareTarget
-        [ref]$true,  # DetectFormatChanges
-        [ref]$true,  # IgnoreAllComparisonWarnings
-        [ref]$false,  # AddToRecentFiles
-        [ref]$false,  # RemovePersonalInformation
-        [ref]$true  # RemoveDateAndTime
+    $DiffFile = $COMObj.CompareDocuments(
+        [ref]$Files["Local"],  # OriginalDocument
+        [ref]$Files["Remote"],  # RevisedDocument
+        [ref][WdCompareDestination]::wdCompareDestinationNew,  # Destination
+        [type]::missing,  # Granularity
+        [ref]$true,  # CompareFormatting
+        [ref]$true,  # CompareCaseChanges
+        [ref]$true,  # CompareWhitespace
+        [ref]$true,  # CompareTables
+        [ref]$true,  # CompareHeaders
+        [ref]$true,  # CompareFootnotes
+        [ref]$true,  # CompareTextboxes
+        [ref]$true,  # CompareFields
+        [ref]$true,  # CompareComments
+        [type]::missing,
+        [ref]"REMOTE",  # RevisedAuthor
+        [ref]$true  # IgnoreAllComparisonWarnings
     )
     $complete += 10
 
-    Write-Progress -Activity $activity -Status "Closing LOCAL" -PercentComplete $complete
-    $LocalFile.Close(
-        [ref][WdSaveOptions]::wdDoNotSaveChanges  # SaveChanges
-    )
-    $complete += 10
+    foreach ($key in $Files.Keys) {
+        Write-Progress -Activity $activity -Status "Closing $key" -PercentComplete $complete
+        $Files[$key].Close(
+            [ref][WdSaveOptions]::wdDoNotSaveChanges  # SaveChanges
+        )
+        $complete += 5
+    }
 
     Write-Progress -Activity $activity -Status "Setting DIFF to unsaved" -PercentComplete $complete
-    $COMObj.ActiveDocument.Saved = 1
+    $DiffFile.Saved = 1
     $complete += 10
 
     Write-Progress -Activity $activity -Status "Bringing to foreground" -PercentComplete $complete

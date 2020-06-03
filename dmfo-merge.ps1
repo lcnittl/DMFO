@@ -21,15 +21,16 @@ $activity = "Preparing files... "
 $complete = 0
 Write-Progress -Activity $activity -Status "Initializing" -PercentComplete $complete
 $FileNames = @{
-    Base = $BaseFileName;
-    Local = $LocalFileName;
-    Remote = $RemoteFileName
+    BASE = $BaseFileName;
+    LOCAL = $LocalFileName;
+    REMOTE = $RemoteFileName
 }
 $FileNamesExt = @{}
+$Files = @{}
 $complete += 10
 
 foreach ($key in @($FileNames.Keys)) {
-    Write-Progress -Activity $activity -Status "Preparing $FileNames[$key]" -PercentComplete $complete
+    Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
     $FileName = (Resolve-Path $FileNames[$key]).Path
     $FileNames[$key] = $FileName
     $FileNameExt = $FileName + $extension
@@ -66,95 +67,76 @@ try {
     exit(1)
 }
 try {
-    Write-Progress -Activity $activity -Status "Opening BASE" -PercentComplete $complete
-    $BaseFile = $COMObj.Documents.Open(
-        [ref]$FileNamesExt["Base"],  # FileName
-        [ref]$false,  # ConfirmConversions
-        [ref]$false,  # ReadOnly
-        [ref]$false  # AddToRecentFiles
-    )
-    $complete += 10
+    foreach ($key in $FileNamesExt.Keys) {
+        Write-Progress -Activity $activity -Status "Opening $key" -PercentComplete $complete
+        $File = $COMObj.Documents.Open(
+            [ref]$FileNamesExt[$key],  # FileName
+            [ref]$false,  # ConfirmConversions
+            [ref]$false,  # ReadOnly
+            [ref]$false  # AddToRecentFiles
+        )
+        $Files += @{$key = $File}
+        $complete += 10
+    }
 
-    Write-Progress -Activity $activity -Status "Opening LOCAL" -PercentComplete $complete
-    $LocalFile = $COMObj.Documents.Open(
-        [ref]$FileNamesExt["Local"],  # FileName
-        [ref]$false,  # ConfirmConversions
-        [ref]$false,  # ReadOnly
-        [ref]$false  # AddToRecentFiles
-    )
-    $complete += 10
-
-    Write-Progress -Activity $activity -Status "Opening REMOTE" -PercentComplete $complete
-    $RemoteFile = $COMObj.Documents.Open(
-        [ref]$FileNamesExt["Remote"],  # FileName
-        [ref]$false,  # ConfirmConversions
-        [ref]$false,  # ReadOnly
-        [ref]$false  # AddToRecentFiles
-    )
-    $complete += 10
-
-    Write-Progress -Activity $activity -Status "Diffing LOCAL vs BASE" -PercentComplete $complete
-    $BaseFile.Activate()
-    $BaseFile.Compare(
-        [ref]$FileNamesExt["Local"],  # Name
-        [ref]"LOCAL",  # AuthorName
-        [ref][WdCompareTarget]::wdCompareTargetSelected,  # CompareTarget
-        [ref]$true,  # DetectFormatChanges
-        [ref]$true,  # IgnoreAllComparisonWarnings
-        [ref]$false,  # AddToRecentFiles
-        [ref]$false,  # RemovePersonalInformation
-        [ref]$true  # RemoveDateAndTime
-    )
-    $complete += 5
-
-    Write-Progress -Activity $activity -Status "Diffing REMOTE vs BASE" -PercentComplete $complete
-
-    $BaseFile.Activate()
-    $BaseFile.Compare(
-        [ref]$FileNamesExt["Remote"],  # Name
-        [ref]"REMOTE",  # AuthorName
-        [ref][WdCompareTarget]::wdCompareTargetSelected,  # CompareTarget
-        [ref]$true,  # DetectFormatChanges
-        [ref]$true,  # IgnoreAllComparisonWarnings
-        [ref]$false,  # AddToRecentFiles
-        [ref]$false,  # RemovePersonalInformation
-        [ref]$true  # RemoveDateAndTime
-    )
-    $complete += 5
-
-    Write-Progress -Activity $activity -Status "Closing BASE" -PercentComplete $complete
-    $BaseFile.Close(
-        [ref][WdSaveOptions]::wdDoNotSaveChanges
-    )
-    $complete += 5
+    foreach ($key in @("LOCAL", "REMOTE")) {
+        Write-Progress -Activity $activity -Status "Diffing $key vs BASE" -PercentComplete $complete
+        $Files[$key] = $COMObj.CompareDocuments(
+            [ref]$Files["BASE"],  # OriginalDocument
+            [ref]$Files[$key],  # RevisedDocument
+            [ref][WdCompareDestination]::wdCompareDestinationRevised,  # Destination
+            [type]::missing,  # Granularity
+            [ref]$true,  # CompareFormatting
+            [ref]$true,  # CompareCaseChanges
+            [ref]$true,  # CompareWhitespace
+            [ref]$true,  # CompareTables
+            [ref]$true,  # CompareHeaders
+            [ref]$true,  # CompareFootnotes
+            [ref]$true,  # CompareTextboxes
+            [ref]$true,  # CompareFields
+            [ref]$true,  # CompareComments
+            [type]::missing,
+            [ref]$key,  # RevisedAuthor
+            [ref]$true  # IgnoreAllComparisonWarnings
+        )
+        $complete += 5
+        Write-Host Opened $key
+    }
 
     Write-Progress -Activity $activity -Status "Merging changes" -PercentComplete $complete
-    # Although the filename and not the object is speciefied in Merge
-    # it takes the content of the document in the active session.
-    $LocalFile.Activate()
-    $LocalFile.Merge(
-        [ref]$FileNamesExt["Remote"],  # Name
-        [ref][WdMergeTarget]::wdMergeTargetNew,  # MergeTarget
-        [ref]$true,  # DetectFormatChanges
-        [ref][WdUseFormattingFrom]::wdFormattingFromPrompt,  # UseFormattingFrom
-        [ref]$false  # AddToRecentFile
+    $MergedFile = $COMObj.MergeDocuments(
+        [ref]$Files["LOCAL"],  # OriginalDocument
+        [ref]$Files["REMOTE"],  # RevisedDocument
+        [ref][WdCompareDestination]::wdCompareDestinationNew,  # Destination
+        [type]::missing,  # Granularity
+        [ref]$true,  # CompareFormatting
+        [ref]$true,  # CompareCaseChanges
+        [ref]$true,  # CompareWhitespace
+        [ref]$true,  # CompareTables
+        [ref]$true,  # CompareHeaders
+        [ref]$true,  # CompareFootnotes
+        [ref]$true,  # CompareTextboxes
+        [ref]$true,  # CompareFields
+        [ref]$true,  # CompareComments
+        [type]::missing,
+        [ref]"Merge LOCAL",  # OriginalAuthor
+        [ref]"Merge REMOTE",  # RevisedAuthor
+        [ref][WdUseFormattingFrom]::wdFormattingFromPrompt  # FormatFrom
     )
-    $MergedFile = $COMObj.ActiveDocument
     $complete += 10
 
-    Write-Progress -Activity $activity -Status "Closing LOCAL and REMOTE" -PercentComplete $complete
-    $LocalFile.Close(
-        [ref][WdSaveOptions]::wdDoNotSaveChanges  # SaveChanges
-    )
-    $RemoteFile.Close(
-        [ref][WdSaveOptions]::wdDoNotSaveChanges  # SaveChanges
-    )
-    $complete += 10
+    foreach ($key in $Files.Keys) {
+        Write-Progress -Activity $activity -Status "Closing $key" -PercentComplete $complete
+        $Files[$key].Close(
+            [ref][WdSaveOptions]::wdDoNotSaveChanges  # SaveChanges
+        )
+        $complete += 5
+    }
 
     Write-Progress -Activity $activity -Status "Saving MERGED" -PercentComplete $complete
     $MergedFile.SaveAs(
-        [ref]$FileNamesExt["Local"],  # FileName
-        [type]::missing,  # FileFormat  #[ref]$saveFormat::wdFormatDocument
+        [ref]$FileNamesExt["LOCAL"],  # FileName
+        [type]::missing,  # FileFormat
         [type]::missing,  # LockComments
         [type]::missing,  # Password
         [ref]$false  # AddToRecentFiles
@@ -194,9 +176,9 @@ try {
 } catch [Management.Automation.RuntimeException] {
     # ComObj was closed already
     $COMObj = New-Object -ComObject "Word.Application"
-    $COMObj.Visible = $false
     $reopen = $true
 }
+$COMObj.Visible = $false
 if ($reopen) {
     $MergedFile = $COMObj.Documents.Open(
         [ref]$FileNamesExt["Local"],  # FileName
