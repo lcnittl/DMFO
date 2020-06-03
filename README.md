@@ -48,8 +48,15 @@ supports Word files):
 
 This option might be added at a later time.
 
+## License
+
+GNU General Public License v3.0 or later
+
+See [COPYING][copying] for the full text.
+
 ---
 
 Inspired by [ExtDiff][extdiff].
 
+[copying]: COPYING
 [extdiff]: https://github.com/ForNeVeR/ExtDiff
