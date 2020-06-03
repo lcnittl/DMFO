@@ -8,8 +8,7 @@ param(
     [string] $RemoteFileHex,
     [string] $RemoteFileMode
 )
-
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = "Stop"
 
 # Constants
 enum WdCompareTarget {

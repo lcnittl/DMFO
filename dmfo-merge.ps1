@@ -10,7 +10,7 @@ param(
 if ($PSVersionTable.PSVersion.Major -lt 6) {
     $PSDefaultParameterValues["Out-File:Encoding"] = "utf8"
 }
-#$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 
 $extension = ".docx"
@@ -164,14 +164,6 @@ try {
         [ref][WdUseFormattingFrom]::wdFormattingFromPrompt,  # UseFormattingFrom
         [ref]$false  # AddToRecentFile
     )
-    #$RemoteFile.Activate()
-    #$RemoteFile.Merge(
-    #    [ref]$FileNamesExt["Local"],  # Name
-    #    [ref][WdMergeTarget]::wdMergeTargetNew,  # MergeTarget
-    #    [ref]$true,  # DetectFormatChanges
-    #    [ref][WdUseFormattingFrom]::wdFormattingFromPrompt,  # UseFormattingFrom
-    #    [ref]$false  # AddToRecentFile
-    #)
     $MergedFile = $COMObj.ActiveDocument
     $complete += 10
 
@@ -220,7 +212,6 @@ $complete = 0
 Write-Progress -Activity $activity -Status "Checking merged file" -PercentComplete $complete
 try {
     # Check if file is still open
-    # $COMObj = [Runtime.Interopservices.Marshal]::GetActiveObject("Word.Application")
     $null = $COMObj.Documents.Item($FileNamesExt["Local"])
 } catch [Runtime.Interopservices.COMException] {
     # Document was closed already
@@ -243,7 +234,6 @@ if ($reopen) {
 $MergedFile.Activate()
 if ($MergedFile.TrackRevisions) {
     Write-Host "Warning: Track Changes is active. Please deactivate!"
-    # $MergedFile.TrackRevisions = 0
 }
 if ($resolved -eq 0) {
     if ($MergedFile.Revisions.count -gt 0) {
