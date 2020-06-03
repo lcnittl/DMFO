@@ -1,8 +1,8 @@
 # DMFO -- Diff and Merge For Office
 
 This is a set of scripts that enable convenient diff and merge of Office-related file
-types (currently only Word, future support for Excel and PowerPoint is planned). The
-office application will be started using COM automation, thus an Office installation is
+types (currently only Word, future support for PowerPoint is planned). The office
+application will be started using COM automation, thus an Office installation is
 required.
 
 DMFO is LFS compatible.
@@ -46,9 +46,10 @@ Specify the following drivers in your `.gitattributes` file (currently DMFO is o
 supporting Word files):
 
 ```
+*.doc diff=dmfo merge=dmfo
 *.docx diff=dmfo merge=dmfo
-*.pptx diff=dmfo merge=dmfo
-*.xlsx diff=dmfo
+*.ppt diff=dmfo
+*.pptx diff=dmfo
 ```
 
 ### CLI
@@ -60,7 +61,7 @@ This option might be added at a later time.
 - Git (for Windows)
 - Git LFS
 - Powershell (>=5.1)
-- Microsoft Office (\[and/or\]: Word, Excel, Powerpoint)
+- Microsoft Office (\[and/or\]: Word, Powerpoint)
 
 ## Platform
 
