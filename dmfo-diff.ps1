@@ -13,6 +13,17 @@ $ErrorActionPreference = "Stop"
 . $PSScriptRoot\constants.ps1
 
 
+$extension = [System.IO.Path]::GetExtension($DiffPath)
+
+if (@(".doc", ".docx") -contains $extension) {
+    $COMApp = "Word.Application"
+} elseif (@(".xls", ".xlsx") -contains $extension) {
+    $COMApp = "Excel.Application"
+} elseif (@(".ppt", ".pptx") -contains $extension) {
+    $COMApp = "PowerPoint.Application"
+}
+
+
 $activity = "Preparing files... "
 $complete = 0
 Write-Progress -Activity $activity -Status "Initializing" -PercentComplete $complete
