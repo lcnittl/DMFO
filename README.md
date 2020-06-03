@@ -10,22 +10,11 @@ DMFO is LFS compatible.
 
 ### Git Integration
 
-You can also use this tool with git, so that `git diff` will use Microsoft Word to diff
-`*.docx` files.
+These tools are intended to use with git, so that `git diff` and `git merge` will use
+Office applications compare and "merge" files.
 
-To do this, you must configure your `.gitattributes` and `.gitconfig` to support a
-custom diff tool.
-
-#### `.gitattributes`
-
-Specify the following drivers in your `.gitattributes` file (currently DMFO only
-supports Word files):
-
-```
-*.docx diff=dmfo merge=dmfo
-*.pptx diff=dmfo merge=dmfo
-*.xlsx diff=dmfo
-```
+Usage requires the configuration of `.gitattributes` and `.gitconfig` to support a
+custom diff and merge driver.
 
 #### `.gitconfig`
 
@@ -44,9 +33,20 @@ Add the following drivers to your git config file:
 
 Replace `<pathToDMFO>` with the repo's path.
 
+#### `.gitattributes`
+
+Specify the following drivers in your `.gitattributes` file (currently DMFO only
+supports Word files):
+
+```
+*.docx diff=dmfo merge=dmfo
+*.pptx diff=dmfo merge=dmfo
+*.xlsx diff=dmfo
+```
+
 ### CLI
 
-This option might be added at a late time.
+This option might be added at a later time.
 
 ---
 
