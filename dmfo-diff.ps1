@@ -51,7 +51,6 @@ foreach ($key in @($FileNames.Keys)) {
 
 try {
     $activity = "Compiling diff of '$DiffPath' with MS Word. This may take a while... "
-    Write-Host "$activity"  # -NoNewLine
     Write-Progress -Activity $activity -Status "Initializing COM object" -PercentComplete 0
     $COMObj = New-Object -ComObject Word.Application
     $COMObj.Visible = $false
@@ -90,7 +89,6 @@ try {
     $COMObj.WindowState = [WdWindowState]::wdWindowStateMinimize
     $COMObj.WindowState = [WdWindowState]::wdWindowStateMaximize
     Write-Progress -Activity $activity -Status "Done" -PercentComplete 100
-    Write-Host "Done."
     sleep 1
 } catch {
     Add-Type -AssemblyName System.Windows.Forms
