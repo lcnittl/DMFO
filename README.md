@@ -49,6 +49,18 @@ supporting Word files):
 
 This option might be added at a later time.
 
+## Reqirements
+
+- Git (for Windows)
+- Git LFS
+- Powershell (>=5.1)
+- Microsoft Office (\[and/or\]: Word, Excel, Powerpoint)
+
+## Platform
+
+In its current implementation, DMFO is suited for Windows 10. Not tested on other
+platforms.
+
 ## License
 
 GNU General Public License v3.0 or later
