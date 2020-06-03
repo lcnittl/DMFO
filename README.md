@@ -12,10 +12,16 @@ DMFO is LFS compatible.
 ### Git Integration
 
 These tools are intended to be used with Git, so that `git diff` and `git merge` will
-use Office applications to compare and "merge" files.
+use Office applications to compare and "merge" files. Simply configure `.gitattributes`
+and `.gitconfig` to support the DMFO diff and merge driver. Enjoy to diff and merge
+Office documents by simply running:
 
-Usage requires the configuration of `.gitattributes` and `.gitconfig` to support the
-DMFO diff and merge driver.
+```cmd
+> git diff
+> git merge
+```
+
+as usual and with any paramter they accept.
 
 #### `.gitconfig`
 
