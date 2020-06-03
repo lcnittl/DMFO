@@ -107,7 +107,6 @@ try {
             [ref]$true  # IgnoreAllComparisonWarnings
         )
         $complete += 5
-        Write-Host Opened $key
     }
 
     Write-Progress -Activity $activity -Status "Merging changes" -PercentComplete $complete
