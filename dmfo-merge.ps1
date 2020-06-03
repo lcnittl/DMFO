@@ -1,4 +1,3 @@
-#  path old-file old-hex old-mode new-file new-hex new-mode
 param(
     [parameter(Mandatory=$true)][string] $BaseFileName,  # $BASE
     [parameter(Mandatory=$true)][string] $LocalFileName,  # $LOCAL
@@ -6,7 +5,6 @@ param(
     [parameter(Mandatory=$false)][string] $ConflictMarkerSize,  # conflict-marker-size
     [parameter(Mandatory=$false)][string] $MergeDest  # $MERGED
 )
-
 if ($PSVersionTable.PSVersion.Major -lt 6) {
     $PSDefaultParameterValues["Out-File:Encoding"] = "utf8"
 }

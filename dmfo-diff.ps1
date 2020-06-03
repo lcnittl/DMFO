@@ -1,12 +1,11 @@
-#  path old-file old-hex old-mode new-file new-hex new-mode
 param(
-    [string] $DiffPath,
-    [string] $LocalFileName,  # $LOCAL
-    [string] $LocalFileHex,
-    [string] $LocalFileMode,
-    [string] $RemoteFileName,  # $REMOTE
-    [string] $RemoteFileHex,
-    [string] $RemoteFileMode
+    [string] $DiffPath,  # path
+    [string] $LocalFileName,  # old-file  $LOCAL
+    [string] $LocalFileHex,  # old-hex
+    [string] $LocalFileMode,  # old-mode
+    [string] $RemoteFileName,  # new-file  $REMOTE
+    [string] $RemoteFileHex,  # new-hex
+    [string] $RemoteFileMode  #  new-mode
 )
 $ErrorActionPreference = "Stop"
 
