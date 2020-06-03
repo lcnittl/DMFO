@@ -25,30 +25,6 @@ enum WdMergeTarget {
     # wdMergeTargetCurrent = 1  # Merge into current document.
     wdMergeTargetNew = 2  # Merge into new document.
 }
-enum WdOpenFormat {
-    wdOpenFormatAuto = 0  # The existing format.
-    # wdOpenFormatDocument = 1  # Word format.
-    # wdOpenFormatDocument97 = 1  # Microsoft Word 97 document format.
-    # wdOpenFormatTemplate = 2  # As a Word template.
-    # wdOpenFormatTemplate97 = 2  # Word 97 template format.
-    # wdOpenFormatRTF = 3  # Rich text format (RTF).
-    # wdOpenFormatText = 4  # Unencoded text format.
-    # wdOpenFormatEncodedText = 5  # Encoded text format.
-    # wdOpenFormatUnicodeText = 5  # Unicode text format.
-    # wdOpenFormatAllWord = 6  # A Microsoft Word format that is backward compatible with earlier versions of Word.
-    # wdOpenFormatWebPages = 7  # HTML format.
-    # wdOpenFormatXML = 8  # XML format.
-    # wdOpenFormatXMLDocument = 9  # XML document format.
-    # wdOpenFormatXMLDocumentMacroEnabled = 10  # XML document format with macros enabled.
-    # wdOpenFormatXMLTemplate = 11  # XML template format.
-    # wdOpenFormatXMLTemplateMacroEnabled = 12  # XML template format with macros enabled.
-    # wdOpenFormatAllWordTemplates = 13  # Word template format.
-    # wdOpenFormatXMLDocumentSerialized = 14  # Open XML file format saved as a single XML file.
-    # wdOpenFormatXMLDocumentMacroEnabledSerialized = 15  # Open XML file format with macros enabled saved as a single XML file.
-    # wdOpenFormatXMLTemplateSerialized = 16  # Open XML template format saved as a XML single file.
-    # wdOpenFormatXMLTemplateMacroEnabledSerialized = 17  # Open XML template format with macros enabled saved as a single XML file.
-    # wdOpenFormatOpenDocumentText = 18  # OpenDocument Text format.
-}
 enum WdSaveOptions {
     # wdPromptToSaveChanges = -2  # Prompt the user to save pending changes.
     # wdSaveChanges = -1 # Save pending changes automatically without prompting the user.
@@ -120,13 +96,7 @@ try {
         [ref]$FileNamesExt["Base"],  # FileName
         [ref]$false,  # ConfirmConversions
         [ref]$false,  # ReadOnly
-        [ref]$false,  # AddToRecentFiles
-        [type]::missing,  # PasswordDocument
-        [type]::missing,  # PasswordTemplate
-        [type]::missing,  # Revert
-        [type]::missing,  # WritePasswordDocument
-        [type]::missing,  # WritePasswordTemplate
-        [ref][wdOpenFormat]::wdOpenFormatAuto  # Format
+        [ref]$false  # AddToRecentFiles
     )
     $complete += 10
 
@@ -135,13 +105,7 @@ try {
         [ref]$FileNamesExt["Local"],  # FileName
         [ref]$false,  # ConfirmConversions
         [ref]$false,  # ReadOnly
-        [ref]$false,  # AddToRecentFiles
-        [type]::missing,  # PasswordDocument
-        [type]::missing,  # PasswordTemplate
-        [type]::missing,  # Revert
-        [type]::missing,  # WritePasswordDocument
-        [type]::missing,  # WritePasswordTemplate
-        [ref][wdOpenFormat]::wdOpenFormatAuto  # Format
+        [ref]$false  # AddToRecentFiles
     )
     $complete += 10
 
@@ -150,13 +114,7 @@ try {
         [ref]$FileNamesExt["Remote"],  # FileName
         [ref]$false,  # ConfirmConversions
         [ref]$false,  # ReadOnly
-        [ref]$false,  # AddToRecentFiles
-        [type]::missing,  # PasswordDocument
-        [type]::missing,  # PasswordTemplate
-        [type]::missing,  # Revert
-        [type]::missing,  # WritePasswordDocument
-        [type]::missing,  # WritePasswordTemplate
-        [ref][wdOpenFormat]::wdOpenFormatAuto  # Format
+        [ref]$false  # AddToRecentFiles
     )
     $complete += 10
 
@@ -278,13 +236,7 @@ if ($reopen) {
         [ref]$FileNamesExt["Local"],  # FileName
         [ref]$false,  # ConfirmConversions
         [ref]$false,  # ReadOnly
-        [ref]$false,  # AddToRecentFiles
-        [type]::missing,  # PasswordDocument
-        [type]::missing,  # PasswordTemplate
-        [type]::missing,  # Revert
-        [type]::missing,  # WritePasswordDocument
-        [type]::missing,  # WritePasswordTemplate
-        [ref][wdOpenFormat]::wdOpenFormatAuto  # Format
+        [ref]$false  # AddToRecentFiles
     )
 }
 
