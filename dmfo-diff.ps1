@@ -10,22 +10,8 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
-# Constants
-enum WdCompareTarget {
-    # wdCompareTargetSelected = 0  # Places comparison differences in the target document.
-    # wdCompareTargetCurrent = 1  # Places comparison differences in the current document. Default.
-    wdCompareTargetNew = 2  # Places comparison differences in a new document.
-}
-enum WdSaveOptions {
-    # wdPromptToSaveChanges = -2  # Prompt the user to save pending changes.
-    # wdSaveChanges = -1 # Save pending changes automatically without prompting the user.
-    wdDoNotSaveChanges = 0  # Do not save pending changes.
-}
-enum WdWindowState {
-    # wdWindowStateNormal = 0  # Normal.
-    wdWindowStateMaximize = 1  # Maximized.
-    wdWindowStateMinimize = 2  # Minimized.
-}
+
+. $PSScriptRoot\constants.ps1
 
 
 $activity = "Preparing files... "
