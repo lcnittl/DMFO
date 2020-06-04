@@ -1,14 +1,3 @@
-# Constants
-enum WdCompareTarget {
-    wdCompareTargetSelected = 0  # Places comparison differences in the target document.
-    # wdCompareTargetCurrent = 1  # Places comparison differences in the current document. Default.
-    wdCompareTargetNew = 2  # Places comparison differences in a new document.
-}
-enum WdMergeTarget {
-    # wdMergeTargetSelected = 0  # Merge into selected document.
-    # wdMergeTargetCurrent = 1  # Merge into current document.
-    wdMergeTargetNew = 2  # Merge into new document.
-}
 enum WdSaveOptions {
     # wdPromptToSaveChanges = -2  # Prompt the user to save pending changes.
     # wdSaveChanges = -1 # Save pending changes automatically without prompting the user.
