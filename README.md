@@ -1,9 +1,8 @@
 # DMFO -- Diff and Merge For Office
 
 This is a set of scripts that enable convenient diff and merge of Office-related file
-types (currently only Word, future support for PowerPoint is planned). The office
-application will be started using COM automation, thus an Office installation is
-required.
+types (currently Word and PowerPoint (diff only)). The office application will be
+started using COM automation, thus an Office installation is required.
 
 DMFO is LFS compatible.
 
