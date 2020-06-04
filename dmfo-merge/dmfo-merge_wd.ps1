@@ -101,12 +101,11 @@ $complete = 100
 Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
 sleep 1
 
-$resolved = $Host.UI.PromptForChoice(
+$resolved = [System.Windows.Forms.MessageBox]::Show(
+    "Confirm conflict resolution for ${MergeDest}?",
     "Merge Complete?",
-    "Confirm conflict resolution for ${MergeDest}: ",
-    @("&Yes"; "&No"),
-    1
-)
+    "YesNo",
+    "Question")
 
 $activity = "Cleaning up... "
 $complete = 0
@@ -168,4 +167,7 @@ $complete = 100
 Write-Progress -Activity $activity -Status "Done" -PercentComplete 100
 sleep 1
 
-exit($resolved)
+if ($resolved -eq "No") {
+    exit(1)
+}
+exit(0)
