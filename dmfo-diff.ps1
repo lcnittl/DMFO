@@ -9,6 +9,7 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
+Add-Type -AssemblyName System.Windows.Forms
 
 $extension = [System.IO.Path]::GetExtension($DiffPath)
 

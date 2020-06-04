@@ -10,6 +10,7 @@ if ($PSVersionTable.PSVersion.Major -lt 6) {
 }
 $ErrorActionPreference = "Stop"
 
+Add-Type -AssemblyName System.Windows.Forms
 
 $extension = [System.IO.Path]::GetExtension($MergeDest)
 

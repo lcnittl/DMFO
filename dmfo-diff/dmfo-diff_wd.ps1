@@ -68,7 +68,6 @@ try {
     Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
     sleep 1
 } catch {
-    Add-Type -AssemblyName System.Windows.Forms
     [System.Windows.Forms.MessageBox]::Show($_.Exception)
 }
 exit(0)

@@ -94,7 +94,6 @@ try {
     $COMObj.WindowState = [WdWindowState]::wdWindowStateMinimize
     $COMObj.WindowState = [WdWindowState]::wdWindowStateMaximize
 } catch {
-    Add-Type -AssemblyName System.Windows.Forms
     [System.Windows.Forms.MessageBox]::Show($_.Exception)
 }
 $complete = 100
