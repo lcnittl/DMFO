@@ -1,5 +1,5 @@
-. $PSScriptRoot\const_mso.ps1
-. $PSScriptRoot\const_pp.ps1
+. $PSScriptRoot\..\constants\const_mso.ps1
+. $PSScriptRoot\..\constants\const_pp.ps1
 
 
 $activity = "Compiling diff of '$DiffPath' with MS PowerPoint. This may take a while... "

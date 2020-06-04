@@ -47,9 +47,9 @@ sleep 1
 
 
 if (@(".doc", ".docx") -contains $extension) {
-    . $PSScriptRoot\dmfo-diff_wd.ps1
+    . $PSScriptRoot\dmfo-diff\dmfo-diff_wd.ps1
 } elseif (@(".ppt", ".pptx") -contains $extension) {
-    . $PSScriptRoot\dmfo-diff_pp.ps1
+    . $PSScriptRoot\dmfo-diff\dmfo-diff_pp.ps1
 } else {
     Write-Host "DMFO-Diff does not know what to do with '$extension' files."
     exit(1)

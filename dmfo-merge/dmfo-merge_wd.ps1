@@ -1,4 +1,4 @@
-. $PSScriptRoot\const_wd.ps1
+. $PSScriptRoot\..\constants\const_wd.ps1
 
 
 $activity = "Compiling 3-way-merge with MS Word. This may take a while... "

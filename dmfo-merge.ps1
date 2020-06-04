@@ -53,7 +53,7 @@ sleep 1
 
 
 if (@(".doc", ".docx") -contains $extension) {
-    . $PSScriptRoot\dmfo-merge_wd.ps1
+    . $PSScriptRoot\dmfo-merge\dmfo-merge_wd.ps1
 } else {
     Write-Host "DMFO-Merge does not know what to do with '$extension' files."
     exit(1)

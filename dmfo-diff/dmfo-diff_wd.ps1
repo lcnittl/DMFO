@@ -1,4 +1,4 @@
-. $PSScriptRoot\const_wd.ps1
+. $PSScriptRoot\..\constants\const_wd.ps1
 
 
 $activity = "Compiling diff of '$DiffPath' with MS Word. This may take a while... "
