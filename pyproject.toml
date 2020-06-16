@@ -4,11 +4,8 @@ version = "0.1.0"
 description = "Diff and Merge for Office."
 authors = ["Christian Knittl-Frank <lcnittl@gmial.com>"]
 license = "GPL-3.0-or-later"
-homepage = "https://github.com/lcnittl/DMFO"
 repository = "https://github.com/lcnittl/DMFO"
-documentation = "https://github.com/lcnittl/DMFO"
 readme = "README.md"
-python = "^3.8"
 
 keywords = ["git", "diff", "merge", "office", "mso"]
 
@@ -28,8 +25,9 @@ dmfo-merge = "dmfo.merge:main"
 
 [build-system]
 requires = [
-    "setuptools >= 35.0.2",
-    "setuptools_scm >= 2.0.0, <3"
+    "setuptools >= 41.0",
+    "setuptools_scm",
+    "wheel",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -58,4 +56,4 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 88
-known_third_party = []
+known_third_party = ["pywin32"]
