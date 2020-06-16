@@ -1,0 +1,61 @@
+[project]
+name = "DMFO"
+version = "0.1.0"
+description = "Diff and Merge for Office."
+authors = ["Christian Knittl-Frank <lcnittl@gmial.com>"]
+license = "GPL-3.0-or-later"
+homepage = "https://github.com/lcnittl/DMFO"
+repository = "https://github.com/lcnittl/DMFO"
+documentation = "https://github.com/lcnittl/DMFO"
+readme = "README.md"
+python = "^3.8"
+
+keywords = ["git", "diff", "merge", "office", "mso"]
+
+classifiers = [
+    "Topic :: Software Development"
+]
+
+[dependencies]
+pywin32 = "^228"
+
+[dev-dependencies]
+pre-commit = { version = "^2.5.1" }
+
+[scripts]
+dmfo-diff = "dmfo.diff:main"
+dmfo-merge = "dmfo.merge:main"
+
+[build-system]
+requires = [
+    "setuptools >= 35.0.2",
+    "setuptools_scm >= 2.0.0, <3"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+known_third_party = []

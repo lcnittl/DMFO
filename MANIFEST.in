@@ -1,0 +1,6 @@
+graft src
+include LICENSE
+include README.md
+
+exclude .pre-commit-config.yaml
+prune ps1

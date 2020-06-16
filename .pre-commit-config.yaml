@@ -7,9 +7,56 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
+      - id: check-toml
       - id: check-yaml
+      - id: requirements-txt-fixer
   - repo: https://github.com/prettier/prettier
     rev: 2.0.5
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
+
+  - repo: https://github.com/mgedmin/check-manifest
+    rev: "0.42"
+    hooks:
+      - id: check-manifest
+  - repo: https://github.com/asottile/seed-isort-config
+    rev: v2.1.1
+    hooks:
+      - id: seed-isort-config
+        name: isort seed config
+        always_run: false
+        types: [python]
+  - repo: https://github.com/timothycrosley/isort
+    rev: 4.3.21
+    hooks:
+      - id: isort
+        additional_dependencies:
+          - toml
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.6.2
+    hooks:
+      - id: bandit
+        args: [--recursive, --quiet, --skip=B322]
+  - repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+      - id: black
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.2
+    hooks:
+      - id: flake8 # E***, W***, F***
+        additional_dependencies:
+          - dlint # DUO***
+          - flake8-2020 # YTT***
+          - flake8-bugbear # B***
+          - flake8-builtins # A***
+          - flake8-comprehensions # C4**
+          - flake8-deprecated # D***
+          - flake8-variables-names # VNE***
+          - mccabe # C9**
+          - pep8-naming # N8**
+  #- repo: https://github.com/PyCQA/pylint
+  #  rev: master
+  #  hooks:
+  #    - id: pylint
