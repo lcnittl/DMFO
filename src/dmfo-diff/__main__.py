@@ -26,7 +26,7 @@ LOG_LVLS = {
 }
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -161,13 +161,7 @@ for alias, FileName in FileNameMap.items():
     ret = subprocess.run(  # nosec
         shlex.split(cmd), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
     ).returncode
-    logging.debug(f"Git LFS returned {ret}")
-    if ret == 2:
-        logging.critical("File not found")
-        sys.exit(1)
-    elif ret == 1:
-        logging.debug("Not LFS pointer")
-    elif ret == 0:
+    if ret == 0:
         logging.debug("Is LFS pointer")
         is_lfs = True
         logging.info("Converting LFS pointer to blob...")
@@ -184,6 +178,14 @@ for alias, FileName in FileNameMap.items():
         )
         shutil.move(AuxFileName, FileName)
         logging.debug("Done.")
+    elif ret == 1:
+        logging.debug("Not LFS pointer")
+    elif ret == 2:
+        logging.critical("File not found")
+        sys.exit(1)
+    else:
+        logging.critical("Unknown return code '%s'!", ret)
+        sys.exit(1)
 
     FileMode = FileName.stat().st_mode
     logging.debug("File has %s mode", oct(FileMode))
