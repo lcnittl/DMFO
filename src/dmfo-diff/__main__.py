@@ -155,41 +155,44 @@ for alias, FileName in FileNameMap.items():
     # Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
     FileName.resolve(strict=True)
     FileNameMap[alias] = FileName
-    print(str(FileName))
-    cmd = f"git lfs pointer --check --file '{str(FileName)}'"
-    gitlfs = subprocess.run(  # nosec
+    logging.debug("Processing '%s'", FileName)
+    logging.debug("Checking if is Git LFS pointer...")
+    cmd = f"git lfs pointer --check --file '{FileName}'"
+    ret = subprocess.run(  # nosec
         shlex.split(cmd), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
-    )
-    logging.debug(f"Git LFS check pointer exited with returncode {gitlfs.returncode}")
-    if gitlfs.returncode == 2:
-        logging.error("File not found")
-    elif gitlfs.returncode == 1:
-        logging.debug("No LFS pointer")
-    elif gitlfs.returncode == 0:
-        logging.debug("LFS pointer")
+    ).returncode
+    logging.debug(f"Git LFS returned {ret}")
+    if ret == 2:
+        logging.critical("File not found")
+        sys.exit(1)
+    elif ret == 1:
+        logging.debug("Not LFS pointer")
+    elif ret == 0:
+        logging.debug("Is LFS pointer")
         is_lfs = True
-        # Write-Host Converting LFS pointer to blob.
+        logging.info("Converting LFS pointer to blob...")
         AuxFileName = Path(str(FileName) + "_")
         cmd = (
             "cmd.exe /c 'type "
             + str(FileName)
             + " | git-lfs smudge > "
             + str(AuxFileName)
-            + "_'"
+            + "'"
         )
         subprocess.run(  # nosec
             shlex.split(cmd), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
         )
         shutil.move(AuxFileName, FileName)
+        logging.debug("Done.")
 
     FileMode = FileName.stat().st_mode
-    logging.debug("File %s has %s mode", FileName, oct(FileMode))
+    logging.debug("File has %s mode", oct(FileMode))
     if FileMode == 0o100444:
-        logging.debug("Removing read-only flag")
+        logging.debug("Removing read-only flag...")
         FileName.chmod(0o666)
+        logging.debug("Done.")
     # $complete += 40
 # $complete = 100
-
 # Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
 # sleep 1
 
