@@ -6,10 +6,15 @@ Diff driver for Office documents. Opens files in MSO to compare them.
 import argparse
 import logging
 import logging.handlers
+import shlex
+import shutil
+import subprocess  # nosec
 import sys
 from pathlib import Path
 
-import pywin
+import colorlog
+
+# import pywin
 
 LOG_LVLS = {
     # "NOTSET": logging.NOTSET,  # 0
@@ -131,61 +136,70 @@ def setup_root_logger() -> logging.Logger:
 args = parse_args()
 root_logger = setup_root_logger()
 
-ext = args.DiffPath.suffix
-logging.DEBUG("Diffing '%s' file.", ext)
+extension = args.DiffPath.suffix
+logging.debug("Diffing '%s' file.", extension)
 
 
-FileNames = {
+# $activity = "Preparing files... "
+# $complete = 0
+# Write-Progress -Activity $activity -Status "Initializing" -PercentComplete $complete
+FileNameMap = {
     "LOCAL": args.LocalFileName,
     "REMOTE": args.RemoteFileName,
 }
-
-for name, FilePath in FileNames.items():
-    print(name, FilePath)
-"""
-$extension = [System.IO.Path]::GetExtension($DiffPath)
+FileMap = {}
+# $complete += 20
 
 
-$activity = "Preparing files... "
-$complete = 0
-Write-Progress -Activity $activity -Status "Initializing" -PercentComplete $complete
-$FileNames = @{
-    LOCAL = $LocalFileName;
-    REMOTE = $RemoteFileName
-}
-$Files = @{}
-$complete += 20
+for alias, FileName in FileNameMap.items():
+    # Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
+    FileName.resolve(strict=True)
+    FileNameMap[alias] = FileName
+    print(str(FileName))
+    cmd = f"git lfs pointer --check --file '{str(FileName)}'"
+    gitlfs = subprocess.run(  # nosec
+        shlex.split(cmd), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
+    )
+    logging.debug(f"Git LFS check pointer exited with returncode {gitlfs.returncode}")
+    if gitlfs.returncode == 2:
+        logging.error("File not found")
+    elif gitlfs.returncode == 1:
+        logging.debug("No LFS pointer")
+    elif gitlfs.returncode == 0:
+        logging.debug("LFS pointer")
+        is_lfs = True
+        # Write-Host Converting LFS pointer to blob.
+        AuxFileName = Path(str(FileName) + "_")
+        cmd = (
+            "cmd.exe /c 'type "
+            + str(FileName)
+            + " | git-lfs smudge > "
+            + str(AuxFileName)
+            + "_'"
+        )
+        subprocess.run(  # nosec
+            shlex.split(cmd), stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr,
+        )
+        shutil.move(AuxFileName, FileName)
 
-foreach ($key in @($FileNames.Keys)) {
-    Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
-    $FileName = (Resolve-Path $FileNames[$key]).Path
-    $FileNames[$key] = $FileName
-    git lfs pointer --check --file $FileName
-    if ($?) {
-        $LFS = $true
-        Write-Host Converting LFS pointer to blob.
-        cmd.exe /c "type $($FileName) | git-lfs smudge > $($FileName + "_")"
-        mv -Force $($FileName + "_") $FileName
-    }
-    $File = Get-ChildItem $FileNameExt
-    if ($File.IsReadOnly) {
-        $File.IsReadOnly = $false
-    }
-    $complete += 40
-}
-$complete = 100
+    FileMode = FileName.stat().st_mode
+    logging.debug("File %s has %s mode", FileName, oct(FileMode))
+    if FileMode == 0o100444:
+        logging.debug("Removing read-only flag")
+        FileName.chmod(0o666)
+    # $complete += 40
+# $complete = 100
 
-Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
-sleep 1
+# Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
+# sleep 1
 
-
-if (@(".doc", ".docx") -contains $extension) {
-    . $PSScriptRoot\dmfo-diff\dmfo-diff_wd.ps1
-} elseif (@(".ppt", ".pptx") -contains $extension) {
-    . $PSScriptRoot\dmfo-diff\dmfo-diff_pp.ps1
-} else {
-    Write-Host "DMFO-Diff does not know what to do with '$extension' files."
-    exit(1)
-}
-exit($LastExitCode)
-"""
+if extension in [".doc", ".docx"]:
+    # . $PSScriptRoot\dmfo-diff\dmfo-diff_wd.ps1
+    pass
+elif extension in [".ppt", ".pptx"]:
+    # . $PSScriptRoot\dmfo-diff\dmfo-diff_pp.ps1
+    pass
+else:
+    logging.critical("DMFO-Diff does not know what to do with '%s' files.", extension)
+    sys.exit(1)
+# exit($LastExitCode)
