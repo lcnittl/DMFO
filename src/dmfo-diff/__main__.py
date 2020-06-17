@@ -229,7 +229,7 @@ def dmfo_diff_wd() -> int:
     # Write-Progress -Activity $activity -Status "Initializing COM object" -PercentComplete $complete
     try:
         logging.debug("Initializing COM object...")
-        COMObj = win32.gencache.EnsureDispatch("Word.Application")  # noqa: N806
+        COMObj = win32.DispatchEx("Word.Application")  # noqa: N806
         COMObj.Visible = False
         # $complete += 20
         logging.debug("Done")
