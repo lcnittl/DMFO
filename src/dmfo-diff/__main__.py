@@ -204,10 +204,10 @@ def init_files() -> None:
             logging.debug("Not LFS pointer")
         elif ret == 2:
             logging.critical("File not found")
-            sys.exit(1)
+            return 1
         else:
             logging.critical("Unknown return code '%s'!", ret)
-            sys.exit(1)
+            return 1
 
         FileMode = FileName.stat().st_mode  # noqa: N806
         logging.debug("File has %s mode", oct(FileMode))
@@ -221,7 +221,7 @@ def init_files() -> None:
     # sleep 1
 
 
-def dmfo_diff_wd() -> None:  # TODO: ?: -> int:
+def dmfo_diff_wd() -> int:
     # . $PSScriptRoot\..\constants\const_wd.ps1
 
     # $activity = "Compiling diff of '$DiffPath' with MS Word. This may take a while... "
@@ -237,7 +237,7 @@ def dmfo_diff_wd() -> None:  # TODO: ?: -> int:
         logging.critical(
             "You must have Microsoft Word installed to perform this operation."
         )
-        sys.exit(1)  # TODO: ?: return 1
+        return 1
 
     try:
         for alias, FileName in FileNameMap.items():  # noqa: N806
@@ -297,8 +297,8 @@ def dmfo_diff_wd() -> None:  # TODO: ?: -> int:
         # sleep 1
     except pywintypes.com_error as exc:
         logging.error("COM-Critical: '%s'", exc.args[1])
-        sys.exit(1)  # TODO: ?: return 1
-    sys.exit(0)  # TODO: ?: return 0
+        return 1
+    return 0
 
 
 def dmfo_diff_pp() -> None:
@@ -322,18 +322,16 @@ FileNameMap = {
 FileObjMap = {}
 # $complete += 20
 
-init_files()
+ret = init_files()
+if ret:
+    sys.exit(ret)
 
 
 if extension in [".doc", ".docx"]:
-    dmfo_diff_wd()  # TODO: ?: ret = dmfo_diff_wd()
-    # . $PSScriptRoot\dmfo-diff\dmfo-diff_wd.ps1
-    pass
+    ret = dmfo_diff_wd()
 elif extension in [".ppt", ".pptx"]:
-    dmfo_diff_pp()  # TODO: ?: ret = dmfo_diff_pp()
-    # . $PSScriptRoot\dmfo-diff\dmfo-diff_pp.ps1
-    pass
+    ret = dmfo_diff_pp()
 else:
     logging.critical("DMFO-Diff does not know what to do with '%s' files.", extension)
-    sys.exit(1)
-# exit(ret)
+    ret = 1
+sys.exit(ret)
