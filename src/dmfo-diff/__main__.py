@@ -14,7 +14,7 @@ from pathlib import Path
 
 import colorlog
 import pywintypes
-import win32com.client as win32
+import win32com.client
 
 LOG_LVLS = {
     # "NOTSET": logging.NOTSET,  # 0
@@ -229,7 +229,7 @@ def dmfo_diff_wd() -> int:
     # Write-Progress -Activity $activity -Status "Initializing COM object" -PercentComplete $complete
     try:
         logging.debug("Initializing COM object...")
-        COMObj = win32.DispatchEx("Word.Application")  # noqa: N806
+        COMObj = win32com.client.DispatchEx("Word.Application")  # noqa: N806
         COMObj.Visible = False
         # $complete += 20
         logging.debug("Done")
