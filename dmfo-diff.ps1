@@ -35,7 +35,7 @@ foreach ($key in @($FileNames.Keys)) {
         cmd.exe /c "type $($FileName) | git-lfs smudge > $($FileName + "_")"
         mv -Force $($FileName + "_") $FileName
     }
-    $File = Get-ChildItem $FileNameExt
+    $File = Get-ChildItem $FileName
     if ($File.IsReadOnly) {
         $File.IsReadOnly = $false
     }
