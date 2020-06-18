@@ -173,10 +173,10 @@ def setup_root_logger() -> logging.Logger:
 
 
 def init_files() -> int:
-    for alias, FileName in FileNameMap.items():  # noqa: N806
-        # Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
-        FileName.resolve(strict=True)  # noqa: N806
+    for alias in ["LOCAL", "REMOTE"]:
+        FileName = FileNameMap[alias].resolve(strict=True)  # noqa: N806
         FileNameMap[alias] = FileName
+        # Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
         logging.debug("Processing '%s' ('%s')", alias, FileName)
         logging.debug("Checking if is Git LFS pointer...")
         cmd = f"git lfs pointer --check --file '{FileName}'"
@@ -228,23 +228,24 @@ def dmfo_diff_wd() -> int:
     # $activity = "Compiling diff of '$DiffPath' with MS Word. This may take a while... "
     # $complete = 0
     # Write-Progress -Activity $activity -Status "Initializing COM object" -PercentComplete $complete
+    logging.debug("Initializing COM object...")
     try:
-        logging.debug("Initializing COM object...")
         COMObj = win32com.client.DispatchEx("Word.Application")  # noqa: N806
         COMObj.Visible = False
         # $complete += 20
         logging.debug("Done")
-    except pywintypes.com_error:
+    except pywintypes.com_error as exc:
         logging.critical(
             "You must have Microsoft Word installed to perform this operation."
         )
+        logging.debug("COM Error: '%s'", exc)
         return 1
 
     try:
-        for alias, FileName in FileNameMap.items():  # noqa: N806
-            logging.debug("Processing '%s' ('%s')", alias, FileName)
+        for alias in ["LOCAL", "REMOTE"]:
+            FileName = FileNameMap[alias]  # noqa: N806
             # Write-Progress -Activity $activity -Status "Opening $key" -PercentComplete $complete
-            logging.debug("Opening '%s'", alias)
+            logging.debug("Opening '%s' ('%s')", alias, FileName)
             FileObjMap[alias] = COMObj.Documents.Open(  # noqa: N806
                 FileName=str(FileName),
                 ConfirmConversions=False,
@@ -254,7 +255,7 @@ def dmfo_diff_wd() -> int:
             # $complete += 15
             logging.debug("Done")
 
-        logging.debug("Diffing REMOTE vs LOCAL")
+        logging.debug("Diffing 'REMOTE' vs 'LOCAL'")
         # Write-Progress -Activity $activity -Status "Diffing REMOTE vs LOCAL" -PercentComplete $complete
         FileObjMap["DIFF"] = COMObj.CompareDocuments(
             OriginalDocument=FileObjMap["LOCAL"],
@@ -272,6 +273,7 @@ def dmfo_diff_wd() -> int:
             RevisedAuthor="REMOTE",
             IgnoreAllComparisonWarnings=True,
         )
+        logging.debug("Done")
         # $complete += 10
 
         for alias in ["LOCAL", "REMOTE"]:
@@ -279,11 +281,13 @@ def dmfo_diff_wd() -> int:
             # Write-Progress -Activity $activity -Status "Closing $key" -PercentComplete $complete
             FileObjMap[alias].Close(SaveChanges=WdSaveOptions.wdDoNotSaveChanges)
             FileObjMap.pop(alias)
+            logging.debug("Done")
             # $complete += 5
 
         logging.debug("Setting 'DIFF' to unsaved")
         # Write-Progress -Activity $activity -Status "Setting DIFF to unsaved" -PercentComplete $complete
         FileObjMap["DIFF"].Saved = 1
+        logging.debug("Done")
         # $complete += 10
 
         logging.debug("Bringing to foreground")
@@ -292,12 +296,14 @@ def dmfo_diff_wd() -> int:
         COMObj.Activate()
         COMObj.WindowState = WdWindowState.wdWindowStateMinimize
         COMObj.WindowState = WdWindowState.wdWindowStateMaximize
+        logging.debug("Done")
         # $complete = 100
 
         # Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
         # sleep 1
     except pywintypes.com_error as exc:
-        logging.error("COM-Critical: '%s'", exc.args[1])
+        logging.error("COM Error: '%s'", exc.args[1])
+        logging.debug("COM Error: '%s'", exc)
         return 1
     return 0
 
@@ -326,7 +332,6 @@ FileObjMap = {}
 ret = init_files()
 if ret:
     sys.exit(ret)
-
 
 if extension in [".doc", ".docx"]:
     ret = dmfo_diff_wd()
