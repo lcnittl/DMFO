@@ -16,15 +16,6 @@ import colorlog
 import pywintypes
 import win32com.client
 
-LOG_LVLS = {
-    # "NOTSET": logging.NOTSET,  # 0
-    "DEBUG": logging.DEBUG,  # 10
-    "INFO": logging.INFO,  # 20
-    "WARNING": logging.WARNING,  # 30
-    "ERROR": logging.ERROR,  # 40
-    "CRITICAL": logging.CRITICAL,  # 50
-}
-
 
 class WdSaveOptions:
     # > Prompt the user to save pending changes.
@@ -98,7 +89,7 @@ def parse_args() -> argparse.Namespace:
         "--verbosity",
         default="INFO",
         type=str.upper,
-        choices=list(LOG_LVLS.keys()),
+        choices=list(logging._nameToLevel.keys()),
         help="Console log level",
     )
     logging_grp.add_argument(
@@ -106,7 +97,7 @@ def parse_args() -> argparse.Namespace:
         "--log",
         default="DEBUG",
         type=str.upper,
-        choices=list(LOG_LVLS.keys()),
+        choices=list(logging._nameToLevel.keys()),
         help="File log level",
     )
 
@@ -130,7 +121,7 @@ def setup_root_logger() -> logging.Logger:
     )
     if log_roll:
         file_handler.doRollover()
-    file_handler.setLevel(LOG_LVLS[args.log])
+    file_handler.setLevel(args.log)
     file_handler.setFormatter(
         logging.Formatter(
             fmt="[%(asctime)s.%(msecs)03d][%(name)s:%(levelname).4s] %(message)s",
@@ -140,7 +131,7 @@ def setup_root_logger() -> logging.Logger:
     logger.addHandler(file_handler)
 
     console_handler = colorlog.StreamHandler()
-    console_handler.setLevel(LOG_LVLS[args.verbosity])
+    console_handler.setLevel(args.verbosity)
     console_handler.setFormatter(
         colorlog.ColoredFormatter(
             fmt="[%(bold_blue)s%(name)s%(reset)s:%(log_color)s%(levelname).4s%(reset)s] %(msg_log_color)s%(message)s",
@@ -166,7 +157,7 @@ def setup_root_logger() -> logging.Logger:
 
     if False:
         # List all log levels with their respective coloring
-        for log_lvl_name, log_lvl in LOG_LVLS.items():
+        for log_lvl_name, log_lvl in logging._nameToLevel.items():
             logger.log(log_lvl, "This is test message for %s", log_lvl_name)
 
     return logger
