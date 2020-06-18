@@ -135,9 +135,10 @@ $MergedFile.Activate()
 if ($MergedFile.TrackRevisions) {
     Write-Host "Warning: Track Changes is active. Please deactivate!"
 }
-if ($resolved -eq 0) {
-    if ($MergedFile.Revisions.count -gt 0) {
-        Write-Host "Warning: Unresolved revisions in the document. Please resolve!"
+if ($resolved -eq "Yes") {
+    if ($MergedFile.Revisions.Count -gt 0) {
+        Write-Host "Warning: Unresolved revisions in the document. Will exit as 'unresolved'."
+        $resolved = "No"
     }
 }
 $complete += 70
