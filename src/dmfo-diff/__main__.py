@@ -172,7 +172,7 @@ def setup_root_logger() -> logging.Logger:
     return logger
 
 
-def init_files() -> None:
+def init_files() -> int:
     for alias, FileName in FileNameMap.items():  # noqa: N806
         # Write-Progress -Activity $activity -Status "Preparing $key" -PercentComplete $complete
         FileName.resolve(strict=True)  # noqa: N806
