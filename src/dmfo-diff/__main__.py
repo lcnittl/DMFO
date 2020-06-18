@@ -219,6 +219,7 @@ def init_files() -> int:
     # $complete = 100
     # Write-Progress -Activity $activity -Status "Done" -PercentComplete $complete
     # sleep 1
+    return 0
 
 
 def dmfo_diff_wd() -> int:
