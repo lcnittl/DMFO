@@ -14,7 +14,7 @@ import tempfile
 import tkinter as tk
 import tkinter.messagebox
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import colorlog
 import pywintypes  # win32com.client.pywintypes
@@ -182,21 +182,20 @@ def setup_root_logger(path: Path = DEFAULT_LOG_PATH) -> logging.Logger:
     return logger
 
 
-def preproc_files(filename_map: Dict[str, Path], target_extension: str) -> int:
-    global has_extension, is_lfs
+def preproc_files(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> int:
     # TODO: progressbar
-    has_extension = False  # TODO: make has_extension a per-file-attribute
-    for alias in filename_map.keys():
-        filename = filename_map[alias].resolve(strict=True)
-        filename_map[alias] = filename
+    for alias in file_map.keys():
+        filename = file_map[alias]["Name"].resolve(strict=True)
+        file_map[alias]["Name"] = filename
         logging.debug("Processing '%s' ('%s')", alias, filename)
         # TODO: progressbar
 
-        if filename.suffix == target_extension:
-            has_extension |= True
+        if filename.suffix == extension:
+            has_extension = True
             fices = ["_", ""]
         else:
-            fices = ["", target_extension]
+            has_extension = False
+            fices = ["", extension]
 
         logging.debug("Checking if is Git LFS pointer...")
         cmd = f"git lfs pointer --check --file '{filename}'"
@@ -223,6 +222,7 @@ def preproc_files(filename_map: Dict[str, Path], target_extension: str) -> int:
             logging.debug("Done")
         elif ret == 1:
             logging.debug("No, is not LFS pointer")
+            is_lfs = False
             if not has_extension:
                 shutil.copy(filename, aux_filename)
         elif ret == 2:
@@ -231,9 +231,11 @@ def preproc_files(filename_map: Dict[str, Path], target_extension: str) -> int:
         else:
             logging.critical("Unknown return code '%s'!", ret)
             return 5
+        file_map[alias]["isLFS"] = is_lfs
 
         if not has_extension:
             filename = aux_filename
+            file_map[alias]["NameExt"] = aux_filename
 
         filemode = filename.stat().st_mode
         logging.debug("File has %s mode", oct(filemode))
@@ -244,6 +246,37 @@ def preproc_files(filename_map: Dict[str, Path], target_extension: str) -> int:
         # TODO: progressbar
     # TODO: progressbar
     return 0
+
+
+def postproc_files(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> None:
+    # TODO: progressbar
+    if args.mode == "merge":
+        # Convert to LFS pointer only if one of the decendants is managed by LFS
+        if any(file_map[alias]["isLFS"] for alias in ["LOCAL", "REMOTE"]):
+            logging.info("Converting LFS blob to pointer...")
+            cmd = (
+                "cmd.exe /c 'type "
+                + str(file_map["LOCAL"]["NameExt"])
+                + " | git-lfs clean > "
+                + str(file_map["LOCAL"]["Name"])
+                + "'"
+            )
+            subprocess.run(  # nosec
+                shlex.split(cmd), stdout=sys.stdout, stderr=sys.stderr,
+            )
+        else:
+            logging.debug("Copying merged file...")
+            shutil.copy(file_map["LOCAL"]["NameExt"], file_map["LOCAL"]["Name"])
+        logging.debug("Done")
+        # TODO: progressbar
+
+    # Delete generated aux files
+    for alias in filter(lambda alias: "NameExt" in file_map[alias], file_map.keys()):
+        filename = file_map[alias]["NameExt"]
+        logging.debug("Removing aux file '%s' ('%s')...", alias, filename)
+        filename.unlink()
+        logging.debug("Done")
+    # TODO: progressbar
 
 
 def ask_resolved() -> bool:
@@ -278,11 +311,13 @@ def init_com_obj(app_name: str) -> Tuple[int, object]:
     return (0, com_obj)
 
 
-def dmfo_diff(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+def dmfo_diff(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> int:
+    file_map["DIFF"] = {}
+
     if extension in [".doc", ".docx"]:
-        ret = dmfo_diff_wd(filename_map=filename_map, fileobj_map=fileobj_map)
+        ret = dmfo_diff_wd(file_map=file_map)
     elif extension in [".ppt", ".pptx"]:
-        ret = dmfo_diff_pp(filename_map=filename_map, fileobj_map=fileobj_map)
+        ret = dmfo_diff_pp(file_map=file_map)
     else:
         logging.critical(
             "DMFO-Diff does not know what to do with '%s' files.", extension
@@ -291,9 +326,11 @@ def dmfo_diff(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> 
     return ret
 
 
-def dmfo_merge(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+def dmfo_merge(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> int:
+    file_map["MERGE"] = {}
+
     if extension in [".doc", ".docx"]:
-        ret = dmfo_merge_wd(filename_map=FileNameMap, fileobj_map=FileObjMap)
+        ret = dmfo_merge_wd(file_map=file_map)
     else:
         logging.critical(
             "DMFO-Merge does not know what to do with '%s' files.", extension
@@ -302,17 +339,21 @@ def dmfo_merge(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) ->
     return ret
 
 
-def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+def dmfo_diff_wd(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> int:
     ret, COMObj = init_com_obj("Word")  # noqa: N806
     if ret:
         return ret
 
     try:
         for alias in ["LOCAL", "REMOTE"]:
-            filename = filename_map[alias]  # noqa: N806
+            filename = (
+                file_map[alias]["Name"]
+                if "NameExt" not in file_map[alias]
+                else file_map[alias]["NameExt"]
+            )
             logging.debug("Opening '%s' ('%s')", alias, filename)
             # TODO: progressbar
-            fileobj_map[alias] = COMObj.Documents.Open(  # noqa: N806
+            file_map[alias]["Object"] = COMObj.Documents.Open(
                 FileName=str(filename),
                 ConfirmConversions=False,
                 ReadOnly=False,
@@ -323,9 +364,9 @@ def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) 
 
         logging.debug("Diffing 'REMOTE' vs 'LOCAL'")
         # TODO: progressbar
-        fileobj_map["DIFF"] = COMObj.CompareDocuments(
-            OriginalDocument=fileobj_map["LOCAL"],
-            RevisedDocument=fileobj_map["REMOTE"],
+        file_map["DIFF"]["Object"] = COMObj.CompareDocuments(
+            OriginalDocument=file_map["LOCAL"]["Object"],
+            RevisedDocument=file_map["REMOTE"]["Object"],
             Destination=WdCompareDestination.wdCompareDestinationNew,
             CompareFormatting=True,
             CompareCaseChanges=True,
@@ -345,14 +386,16 @@ def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) 
         for alias in ["LOCAL", "REMOTE"]:
             logging.debug("Closing '%s'", alias)
             # TODO: progressbar
-            fileobj_map[alias].Close(SaveChanges=WdSaveOptions.wdDoNotSaveChanges)
-            fileobj_map.pop(alias)
+            file_map[alias]["Object"].Close(
+                SaveChanges=WdSaveOptions.wdDoNotSaveChanges
+            )
+            file_map[alias].pop("Object")
             logging.debug("Done")
             # TODO: progressbar
 
         logging.debug("Setting 'DIFF' to unsaved")
         # TODO: progressbar
-        fileobj_map["DIFF"].Saved = 1
+        file_map["DIFF"]["Object"].Saved = 1
         logging.debug("Done")
         # TODO: progressbar
 
@@ -371,17 +414,17 @@ def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) 
     return 0
 
 
-def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+def dmfo_merge_wd(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> int:
     ret, COMObj = init_com_obj("Word")  # noqa: N806
     if ret:
         return ret
 
     try:
         for alias in ["BASE", "LOCAL", "REMOTE"]:
-            aux_filename = Path(str(filename_map[alias]) + extension)  # noqa: N806
+            aux_filename = Path(str(file_map[alias]["Name"]) + extension)  # noqa: N806
             # TODO: progressbar
             logging.debug("Opening '%s' ('%s')", alias, aux_filename)
-            fileobj_map[alias] = COMObj.Documents.Open(  # noqa: N806
+            file_map[alias]["Object"] = COMObj.Documents.Open(  # noqa: N806
                 FileName=str(aux_filename),
                 ConfirmConversions=False,
                 ReadOnly=False,
@@ -393,9 +436,9 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
         for alias in ["LOCAL", "REMOTE"]:
             logging.debug("Diffing '%s' vs 'BASE'", alias)
             # TODO: progressbar
-            fileobj_map[alias] = COMObj.CompareDocuments(
-                OriginalDocument=fileobj_map["BASE"],
-                RevisedDocument=fileobj_map[alias],
+            file_map[alias]["Object"] = COMObj.CompareDocuments(
+                OriginalDocument=file_map["BASE"]["Object"],
+                RevisedDocument=file_map[alias]["Object"],
                 Destination=WdCompareDestination.wdCompareDestinationRevised,
                 CompareFormatting=True,
                 CompareCaseChanges=True,
@@ -414,9 +457,9 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
 
         logging.debug("Merging changes")
         # TODO: progressbar
-        fileobj_map["MERGE"] = COMObj.MergeDocuments(
-            OriginalDocument=fileobj_map["LOCAL"],
-            RevisedDocument=fileobj_map["REMOTE"],
+        file_map["MERGE"]["Object"] = COMObj.MergeDocuments(
+            OriginalDocument=file_map["LOCAL"]["Object"],
+            RevisedDocument=file_map["REMOTE"]["Object"],
             Destination=WdCompareDestination.wdCompareDestinationNew,
             CompareFormatting=True,
             CompareCaseChanges=True,
@@ -437,17 +480,17 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
         for alias in ["BASE", "LOCAL", "REMOTE"]:
             logging.debug("Closing '%s'", alias)
             # TODO: progressbar
-            fileobj_map[alias].Close(SaveChanges=WdSaveOptions.wdDoNotSaveChanges)
-            fileobj_map.pop(alias)
+            file_map[alias]["Object"].Close(
+                SaveChanges=WdSaveOptions.wdDoNotSaveChanges
+            )
+            file_map[alias].pop("Object")
             logging.debug("Done")
             # TODO: progressbar
 
-        filename_map["MERGE"] = filename_map["LOCAL"]
-
         logging.debug("Saving 'MERGE'")
         # TODO: progressbar
-        fileobj_map["MERGE"].SaveAs(
-            FileName=str(filename_map["MERGE"]) + extension, AddToRecentFiles=False,
+        file_map["MERGE"]["Object"].SaveAs(
+            FileName=str(file_map["LOCAL"]["Name"]) + extension, AddToRecentFiles=False,
         )
         logging.debug("Done")
         # TODO: progressbar
@@ -472,7 +515,7 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
 
     try:
         logging.debug("Checking if 'MERGE' is still open...")
-        COMObj.Documents.Item(str(filename_map["MERGE"]) + extension)
+        COMObj.Documents.Item(str(file_map["LOCAL"]["Name"]) + extension)
         logging.debug("'MERGE' is still open.")
     except pywintypes.com_error as exc:
         reopen = True
@@ -492,9 +535,9 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
     COMObj.Visible = False
 
     if reopen:
-        logging.debug("Opening '%s' ('%s')", "MERGE", filename_map["MERGE"])
-        fileobj_map["MERGE"] = COMObj.Documents.Open(  # noqa: N806
-            FileName=str(filename_map["MERGE"]) + extension,
+        logging.debug("Opening '%s' ('%s')", "MERGE", file_map["LOCAL"]["Name"])
+        file_map["MERGE"]["Object"] = COMObj.Documents.Open(  # noqa: N806
+            FileName=str(file_map["LOCAL"]["Name"]) + extension,
             ConfirmConversions=False,
             ReadOnly=False,
             AddToRecentFiles=False,
@@ -502,11 +545,11 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
         logging.debug("Done")
         # TODO: progressbar
 
-    if fileobj_map["MERGE"].TrackRevisions:
+    if file_map["MERGE"]["Object"].TrackRevisions:
         logging.warning("Warning: Track Changes is active. Please deactivate!")
         # Deactivate track changes?
     if is_resolved:
-        if fileobj_map["MERGE"].Revisions.Count > 0:
+        if file_map["MERGE"]["Object"].Revisions.Count > 0:
             is_resolved = False  # TODO: Transfer to ps1 script
             logging.warning(
                 "Warning: Unresolved revisions in the document. "
@@ -515,33 +558,13 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
     # TODO: progressbar
 
     # TODO: progressbar
-    fileobj_map["MERGE"].Close()
+    file_map["MERGE"]["Object"].Close()
     if COMObj.Documents.Count == 0:
         logging.debug("No more open documents in COMObj, closing...")
         COMObj.Quit()
         logging.debug("Done")
+    file_map["MERGE"].pop("Object")
     # TODO: progressbar
-
-    # TODO: progressbar
-    if is_lfs:
-        logging.info("Converting LFS blob to pointer...")
-        cmd = (
-            "cmd.exe /c 'type "
-            + (str(filename_map["MERGE"]) + extension)
-            + " | git-lfs clean > "
-            + str(filename_map["MERGE"])
-            + "'"
-        )
-        subprocess.run(  # nosec
-            shlex.split(cmd), stdout=sys.stdout, stderr=sys.stderr,
-        )
-    else:
-        logging.debug("Copying merged file...")
-        shutil.copy(Path(str(filename_map["MERGE"]) + extension), filename_map["MERGE"])
-    logging.debug("Done")
-    # TODO: progressbar
-
-    filename_map.pop("MERGE")
 
     # Return as return code: is_resolved -> True: 0, False: 1
     return int(not is_resolved)
@@ -551,11 +574,10 @@ args = parse_args()
 TempDir = Path(tempfile.mkdtemp(prefix=f"dmfo_{args.mode}_"))
 root_logger = setup_root_logger(path=TempDir)
 
-FileNameMap = {
-    "LOCAL": args.LocalFileName,
-    "REMOTE": args.RemoteFileName,
+FileMap = {
+    "LOCAL": {"Name": args.LocalFileName},
+    "REMOTE": {"Name": args.RemoteFileName},
 }
-FileObjMap = {}
 
 # extension = args.TargetPath.suffix
 if args.mode == "diff":
@@ -565,25 +587,18 @@ elif args.mode == "merge":
     extension = args.MergeDest.suffix
     logging.debug("Merging '%s' file.", extension)
 
-    FileNameMap.update({"BASE": args.BaseFileName})
+    FileMap.update({"BASE": {"Name": args.BaseFileName}})
 
-ret = preproc_files(filename_map=FileNameMap, target_extension=extension)
+ret = preproc_files(file_map=FileMap)
 if ret:
     sys.exit(ret)
 
 if args.mode == "diff":
-    ret = dmfo_diff(filename_map=FileNameMap, fileobj_map=FileObjMap)
+    ret = dmfo_diff(file_map=FileMap)
 elif args.mode == "merge":
-    ret = dmfo_merge(filename_map=FileNameMap, fileobj_map=FileObjMap)
+    ret = dmfo_merge(file_map=FileMap)
 
-if not has_extension:
-    # TODO: progressbar
-    for alias in FileNameMap.keys():
-        FileNameExt = Path(str(FileNameMap[alias]) + extension)  # noqa: N806
-        logging.debug("Removing aux file '%s' ('%s')...", alias, FileNameExt)
-        FileNameExt.unlink()
-        logging.debug("Done")
-    # TODO: progressbar
+postproc_files(file_map=FileMap)
 
 if ret > 1:
     logging.critical(
