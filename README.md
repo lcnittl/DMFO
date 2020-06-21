@@ -6,6 +6,10 @@ started using COM automation, thus an Office installation is required.
 
 DMFO is LFS compatible.
 
+**Important:** DMFO is currently ported to Python. Legacy PowerShell scripts are located
+in [ps1][ps1] and may still be used. Please reregister DMFO in your Git config if you
+are updating from a pre-Python version (_vide infra_).
+
 ## Usage
 
 ### Git Integration
@@ -33,11 +37,11 @@ Alternatively, add the entries manually to your git config:
 ```ini
 [diff "dmfo"]
 	name = DMFO diff driver
-	command = "powershell.exe -File <pathToDMFO>/dmfo-diff.ps1"
+	command = "powershell.exe -File <pathToDMFO>/ps1/dmfo-diff.ps1"
 	binary = true
 [merge "dmfo"]
 	name = DMFO merge driver
-	driver = "powershell.exe -File <pathToDMFO>/dmfo-merge.ps1 %O %A %B %L %P"
+	driver = "powershell.exe -File <pathToDMFO>/ps1/dmfo-merge.ps1 %O %A %B %L %P"
 	binary = true
 ```
 
@@ -83,4 +87,5 @@ Inspired by [ExtDiff][extdiff].
 
 [license]: LICENSE
 [extdiff]: https://github.com/ForNeVeR/ExtDiff
-[register]: reg_dmfo_drivers.ps1
+[ps1]: ps1/
+[register]: ps1/reg_dmfo_drivers.ps1
