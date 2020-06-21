@@ -10,10 +10,11 @@ import shlex
 import shutil
 import subprocess  # nosec
 import sys
+import tempfile
 import tkinter as tk
 import tkinter.messagebox
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import colorlog
 import pywintypes  # win32com.client.pywintypes
@@ -30,6 +31,9 @@ from constants.mso.wd import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+DEFAULT_LOG_PATH = Path(".")
 
 
 def parse_args() -> argparse.Namespace:
@@ -115,19 +119,21 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def setup_root_logger() -> logging.Logger:
+def setup_root_logger(path: Path = DEFAULT_LOG_PATH) -> logging.Logger:
     global log_filename
 
     logger = logging.getLogger()
     logger.setLevel(logging.NOTSET)
 
+    """
     module_loglevel_map = {
         "pywin32": logging.WARNING,
     }
     for module, loglevel in module_loglevel_map.items():
         logging.getLogger(module).setLevel(loglevel)
+    """
 
-    log_filename = Path(f"{Path(__file__).stem}.log")
+    log_filename = Path(f"{Path(path) / Path(__file__).stem}.log")
     log_roll = log_filename.is_file()
     file_handler = logging.handlers.RotatingFileHandler(
         filename=log_filename, mode="a", backupCount=9, encoding="utf-8",
@@ -241,19 +247,6 @@ def preproc_files(filename_map: Dict[str, Path], target_extension: str) -> int:
 
 
 def ask_resolved() -> bool:
-    # root = tk.Tk()
-    # root.overrideredirect(1)
-    # root.withdraw()
-    # ret = tk.messagebox.askyesno(
-    #     title="Merge Complete?",
-    #     message=f"Confirm conflict resolution for {'args.MergeDest'}?",
-    #     icon="question",
-    # )
-    # root.destroy()
-    # if not ret:
-    #     tk.messagebox.showinfo(
-    #         "Return", "You will now return to the application screen"
-    #     )
     ret = win32ui.MessageBox(
         f"Confirm conflict resolution for {22}?",
         "Merge Complete?",
@@ -268,20 +261,51 @@ def dmfo_diff_pp() -> int:
     pass
 
 
-def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+def init_com_obj(app_name: str) -> Tuple[int, object]:
     logging.debug("Initializing COM object...")
     # TODO: progressbar
     try:
-        COMObj = win32com.client.DispatchEx("Word.Application")  # noqa: N806
-        COMObj.Visible = False
+        com_obj = win32com.client.DispatchEx(f"{app_name}.Application")
+        com_obj.Visible = False
         logging.debug("Done")
         # TODO: progressbar
     except pywintypes.com_error as exc:
         logging.critical(
-            "You must have Microsoft Word installed to perform this operation."
+            "You must have Microsoft %s installed to perform this operation.", app_name
         )
         logging.debug("COM Error: '%s'", exc)
-        return 3
+        return (3, None)
+    return (0, com_obj)
+
+
+def dmfo_diff(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+    if extension in [".doc", ".docx"]:
+        ret = dmfo_diff_wd(filename_map=filename_map, fileobj_map=fileobj_map)
+    elif extension in [".ppt", ".pptx"]:
+        ret = dmfo_diff_pp(filename_map=filename_map, fileobj_map=fileobj_map)
+    else:
+        logging.critical(
+            "DMFO-Diff does not know what to do with '%s' files.", extension
+        )
+        ret = 2
+    return ret
+
+
+def dmfo_merge(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+    if extension in [".doc", ".docx"]:
+        ret = dmfo_merge_wd(filename_map=FileNameMap, fileobj_map=FileObjMap)
+    else:
+        logging.critical(
+            "DMFO-Merge does not know what to do with '%s' files.", extension
+        )
+        ret = 2
+    return ret
+
+
+def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
+    ret, COMObj = init_com_obj("Word")  # noqa: N806
+    if ret:
+        return ret
 
     try:
         for alias in ["LOCAL", "REMOTE"]:
@@ -348,19 +372,9 @@ def dmfo_diff_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) 
 
 
 def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object]) -> int:
-    logging.debug("Initializing COM object...")
-    # TODO: progressbar
-    try:
-        COMObj = win32com.client.DispatchEx("Word.Application")  # noqa: N806
-        COMObj.Visible = False
-        # TODO: progressbar
-        logging.debug("Done")
-    except pywintypes.com_error as exc:
-        logging.critical(
-            "You must have Microsoft Word installed to perform this operation."
-        )
-        logging.debug("COM Error: '%s'", exc)
-        return 3
+    ret, COMObj = init_com_obj("Word")  # noqa: N806
+    if ret:
+        return ret
 
     try:
         for alias in ["BASE", "LOCAL", "REMOTE"]:
@@ -401,9 +415,9 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
         logging.debug("Merging changes")
         # TODO: progressbar
         fileobj_map["MERGE"] = COMObj.MergeDocuments(
-            fileobj_map["LOCAL"],  # OriginalDocument
-            fileobj_map["REMOTE"],  # RevisedDocument
-            WdCompareDestination.wdCompareDestinationNew,  # Destination
+            OriginalDocument=fileobj_map["LOCAL"],
+            RevisedDocument=fileobj_map["REMOTE"],
+            Destination=WdCompareDestination.wdCompareDestinationNew,
             CompareFormatting=True,
             CompareCaseChanges=True,
             CompareWhitespace=True,
@@ -466,28 +480,28 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
             logging.debug("'MERGE' has been closed, reopening...")
         elif exc.args[0] in [-2147023174, -2147023179]:
             logging.debug("COMObj has been closed, reinitializing...")
-            COMObj = win32com.client.DispatchEx("Word.Application")  # noqa: N806
-            logging.debug("Done")
+            ret, COMObj = init_com_obj("Word")  # noqa: N806
+            if ret:
+                return ret
         else:
             logging.error("COM Error: '%s'", exc.args[1])
             logging.debug("COM Error: '%s'", exc)
     else:
         reopen = False
-    finally:
-        COMObj.Visible = False
 
-        if reopen:
-            logging.debug("Opening '%s' ('%s')", "MERGE", filename_map["MERGE"])
-            fileobj_map["MERGE"] = COMObj.Documents.Open(  # noqa: N806
-                FileName=str(filename_map["MERGE"]) + extension,
-                ConfirmConversions=False,
-                ReadOnly=False,
-                AddToRecentFiles=False,
-            )
-            logging.debug("Done")
-            # TODO: progressbar
+    COMObj.Visible = False
 
-    # fileobj_map["MERGE"].Activate()  # TODO: Needed?
+    if reopen:
+        logging.debug("Opening '%s' ('%s')", "MERGE", filename_map["MERGE"])
+        fileobj_map["MERGE"] = COMObj.Documents.Open(  # noqa: N806
+            FileName=str(filename_map["MERGE"]) + extension,
+            ConfirmConversions=False,
+            ReadOnly=False,
+            AddToRecentFiles=False,
+        )
+        logging.debug("Done")
+        # TODO: progressbar
+
     if fileobj_map["MERGE"].TrackRevisions:
         logging.warning("Warning: Track Changes is active. Please deactivate!")
         # Deactivate track changes?
@@ -513,8 +527,7 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
         logging.info("Converting LFS blob to pointer...")
         cmd = (
             "cmd.exe /c 'type "
-            + str(filename_map["MERGE"])
-            + extension
+            + (str(filename_map["MERGE"]) + extension)
             + " | git-lfs clean > "
             + str(filename_map["MERGE"])
             + "'"
@@ -535,7 +548,8 @@ def dmfo_merge_wd(filename_map: Dict[str, Path], fileobj_map: Dict[str, object])
 
 
 args = parse_args()
-root_logger = setup_root_logger()
+TempDir = Path(tempfile.mkdtemp(prefix=f"dmfo_{args.mode}_"))
+root_logger = setup_root_logger(path=TempDir)
 
 FileNameMap = {
     "LOCAL": args.LocalFileName,
@@ -553,28 +567,14 @@ elif args.mode == "merge":
 
     FileNameMap.update({"BASE": args.BaseFileName})
 
-ret = preproc_files(filename_map=FileNameMap, target_extension=extension,)
+ret = preproc_files(filename_map=FileNameMap, target_extension=extension)
 if ret:
     sys.exit(ret)
 
 if args.mode == "diff":
-    if extension in [".doc", ".docx"]:
-        ret = dmfo_diff_wd(filename_map=FileNameMap, fileobj_map=FileObjMap)
-    elif extension in [".ppt", ".pptx"]:
-        ret = dmfo_diff_pp(filename_map=FileNameMap, fileobj_map=FileObjMap)
-    else:
-        logging.critical(
-            "DMFO-Diff does not know what to do with '%s' files.", extension
-        )
-        ret = 2
+    ret = dmfo_diff(filename_map=FileNameMap, fileobj_map=FileObjMap)
 elif args.mode == "merge":
-    if extension in [".doc", ".docx"]:
-        ret = dmfo_merge_wd(filename_map=FileNameMap, fileobj_map=FileObjMap)
-    else:
-        logging.critical(
-            "DMFO-Merge does not know what to do with '%s' files.", extension
-        )
-        ret = 2
+    ret = dmfo_merge(filename_map=FileNameMap, fileobj_map=FileObjMap)
 
 if not has_extension:
     # TODO: progressbar
