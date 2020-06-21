@@ -421,11 +421,15 @@ def dmfo_merge_wd(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> 
 
     try:
         for alias in ["BASE", "LOCAL", "REMOTE"]:
-            aux_filename = Path(str(file_map[alias]["Name"]) + extension)  # noqa: N806
+            filename = (
+                file_map[alias]["Name"]
+                if "NameExt" not in file_map[alias]
+                else file_map[alias]["NameExt"]
+            )
             # TODO: progressbar
-            logger.debug("Opening '%s' ('%s')", alias, aux_filename)
+            logger.debug("Opening '%s' ('%s')", alias, filename)
             file_map[alias]["Object"] = COMObj.Documents.Open(  # noqa: N806
-                FileName=str(aux_filename),
+                FileName=str(filename),
                 ConfirmConversions=False,
                 ReadOnly=False,
                 AddToRecentFiles=False,
@@ -490,7 +494,7 @@ def dmfo_merge_wd(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> 
         logger.debug("Saving 'MERGE'")
         # TODO: progressbar
         file_map["MERGE"]["Object"].SaveAs(
-            FileName=str(file_map["LOCAL"]["Name"]) + extension, AddToRecentFiles=False,
+            FileName=str(filename), AddToRecentFiles=False,
         )
         logger.debug("Done")
         # TODO: progressbar
@@ -515,7 +519,7 @@ def dmfo_merge_wd(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> 
 
     try:
         logger.debug("Checking if 'MERGE' is still open...")
-        COMObj.Documents.Item(str(file_map["LOCAL"]["Name"]) + extension)
+        COMObj.Documents.Item(str(filename))
         logger.debug("'MERGE' is still open.")
     except pywintypes.com_error as exc:
         reopen = True
@@ -537,7 +541,7 @@ def dmfo_merge_wd(file_map: Dict[str, Dict[str, Union[bool, object, Path]]]) -> 
     if reopen:
         logger.debug("Opening '%s' ('%s')", "MERGE", file_map["LOCAL"]["Name"])
         file_map["MERGE"]["Object"] = COMObj.Documents.Open(  # noqa: N806
-            FileName=str(file_map["LOCAL"]["Name"]) + extension,
+            FileName=str(filename),
             ConfirmConversions=False,
             ReadOnly=False,
             AddToRecentFiles=False,
