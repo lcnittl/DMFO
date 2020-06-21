@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict
 
 import pywintypes  # win32com.client.pywintypes
 import win32com.client
@@ -15,34 +15,16 @@ from constants.mso.wd import (
     WdUseFormattingFrom,
     WdWindowState,
 )
-from driver import init_com_obj
+from driver.common import init_com_obj
 
 logger = logging.getLogger(__name__)
 
 
-def differ(filedata_map: Dict[str, object]) -> int:
-    filedata_map["DIFF"] = VCSFileData(Path())
-
-    extension = VCSFileData.target_ext
-    if extension in [".doc", ".docx"]:
-        ret = diff_wd(filedata_map=filedata_map)
-    elif extension in [".ppt", ".pptx"]:
-        ret = diff_pp(filedata_map=filedata_map)
-    else:
-        logger.critical(
-            "DMFO-Diff does not know what to do with '%s' files.", extension
-        )
-        ret = 2
-
-    filedata_map.pop("DIFF")
-    return ret
-
-
-def diff_pp() -> int:
+def pp() -> int:
     pass
 
 
-def diff_wd(filedata_map: Dict[str, object]) -> int:
+def wd(filedata_map: Dict[str, object]) -> int:
     ret, COMObj = init_com_obj("Word")  # noqa: N806
     if ret:
         return ret

@@ -6,35 +6,18 @@ import pywintypes  # win32com.client.pywintypes
 import win32com.client
 import win32con
 import win32ui
-from classes import VCSFileData
 from constants.mso.wd import (
     WdCompareDestination,
     WdSaveOptions,
     WdUseFormattingFrom,
     WdWindowState,
 )
-from driver import ask_resolved, init_com_obj
+from driver.common import ask_resolved, init_com_obj
 
 logger = logging.getLogger(__name__)
 
 
-def merger(filedata_map: Dict[str, object]) -> int:
-    filedata_map["MERGE"] = VCSFileData(Path())
-
-    extension = VCSFileData.target_ext
-    if extension in [".doc", ".docx"]:
-        ret = merge_wd(filedata_map=filedata_map)
-    else:
-        logger.critical(
-            "DMFO-Merge does not know what to do with '%s' files.", extension
-        )
-        ret = 2
-
-    filedata_map.pop("MERGE")
-    return ret
-
-
-def merge_wd(filedata_map: Dict[str, object]) -> int:
+def wd(filedata_map: Dict[str, object]) -> int:
     ret, COMObj = init_com_obj("Word")  # noqa: N806
     if ret:
         return ret

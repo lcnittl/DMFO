@@ -13,8 +13,7 @@ from typing import Dict, List, Tuple, Union
 
 import colorlog
 import driver
-import driver.diff
-import driver.merge
+import driver.common
 from classes import VCSFileData
 
 logger = logging.getLogger(__name__)
@@ -189,16 +188,16 @@ elif args.mode == "merge":
     FiledataMap["BASE"] = VCSFileData(args.BaseFileName)
 VCSFileData.target_ext = extension
 
-ret = driver.preproc_files(filedata_map=FiledataMap)
+ret = driver.common.preproc_files(filedata_map=FiledataMap)
 if ret:
     sys.exit(ret)
 
 if args.mode == "diff":
-    ret = driver.diff.differ(filedata_map=FiledataMap)
+    ret = driver.diff(filedata_map=FiledataMap)
 elif args.mode == "merge":
-    ret = driver.merge.merger(filedata_map=FiledataMap)
+    ret = driver.merge(filedata_map=FiledataMap)
 
-driver.postproc_files(filedata_map=FiledataMap, mode=args.mode)
+driver.common.postproc_files(filedata_map=FiledataMap, mode=args.mode)
 
 if ret > 1:
     logger.critical(
