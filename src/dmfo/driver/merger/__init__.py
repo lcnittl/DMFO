@@ -6,13 +6,13 @@ import pywintypes  # win32com.client.pywintypes
 import win32com.client
 import win32con
 import win32ui
-from constants.mso.wd import (
+from dmfo.constants.mso.wd import (
     WdCompareDestination,
     WdSaveOptions,
     WdUseFormattingFrom,
     WdWindowState,
 )
-from driver.common import ask_resolved, init_com_obj
+from dmfo.driver.common import ask_resolved, init_com_obj
 
 logger = logging.getLogger(__name__)
 

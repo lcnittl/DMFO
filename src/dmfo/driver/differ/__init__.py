@@ -6,16 +6,16 @@ import pywintypes  # win32com.client.pywintypes
 import win32com.client
 import win32con
 import win32ui
-from classes import VCSFileData
-from constants.mso.mso import MsoTriState
-from constants.mso.pp import PpWindowState
-from constants.mso.wd import (
+from dmfo.classes import VCSFileData
+from dmfo.constants.mso.mso import MsoTriState
+from dmfo.constants.mso.pp import PpWindowState
+from dmfo.constants.mso.wd import (
     WdCompareDestination,
     WdSaveOptions,
     WdUseFormattingFrom,
     WdWindowState,
 )
-from driver.common import init_com_obj
+from dmfo.driver.common import init_com_obj
 
 logger = logging.getLogger(__name__)
 

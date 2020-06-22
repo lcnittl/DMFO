@@ -1,5 +1,7 @@
 graft src
+include *.in
 include LICENSE
+include pyproject.toml
 include README.md
 
 exclude .flake8

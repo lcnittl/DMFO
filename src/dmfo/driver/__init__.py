@@ -3,9 +3,9 @@ import logging
 from pathlib import Path
 from typing import Dict
 
-import driver.differ
-import driver.merger
-from classes import VCSFileData
+import dmfo.driver.differ
+import dmfo.driver.merger
+from dmfo.classes import VCSFileData
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +15,9 @@ def diff(filedata_map: Dict[str, object]) -> int:
 
     extension = VCSFileData.target_ext
     if extension in [".doc", ".docx"]:
-        ret = driver.differ.wd(filedata_map=filedata_map)
+        ret = dmfo.driver.differ.wd(filedata_map=filedata_map)
     elif extension in [".ppt", ".pptx"]:
-        ret = driver.differ.pp(filedata_map=filedata_map)
+        ret = dmfo.driver.differ.pp(filedata_map=filedata_map)
     else:
         logger.critical(
             "DMFO-Diff does not know what to do with '%s' files.", extension
@@ -33,7 +33,7 @@ def merge(filedata_map: Dict[str, object]) -> int:
 
     extension = VCSFileData.target_ext
     if extension in [".doc", ".docx"]:
-        ret = driver.merger.wd(filedata_map=filedata_map)
+        ret = dmfo.driver.merger.wd(filedata_map=filedata_map)
     else:
         logger.critical(
             "DMFO-Merge does not know what to do with '%s' files.", extension

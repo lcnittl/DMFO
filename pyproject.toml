@@ -1,35 +1,24 @@
-[project]
-name = "DMFO"
+[tool.poetry]
+name = "dmfo"
 version = "0.1.0"
 description = "Diff and Merge for Office."
-authors = ["Christian Knittl-Frank <lcnittl@gmial.com>"]
+authors = ["Christian Knittl-Frank <lcnittl@gmail.com>"]
 license = "GPL-3.0-or-later"
 repository = "https://github.com/lcnittl/DMFO"
 readme = "README.md"
-
 keywords = ["git", "diff", "merge", "office", "mso"]
 
-classifiers = [
-    "Topic :: Software Development"
-]
-
-[dependencies]
+[tool.poetry.dependencies]
+python = "^3.8"
 pywin32 = "^228"
+colorlog = "^4.1.0"
 
-[dev-dependencies]
-pre-commit = { version = "^2.5.1" }
-
-[scripts]
-dmfo-diff = "dmfo.diff:main"
-dmfo-merge = "dmfo.merge:main"
+[tool.poetry.dev-dependencies]
+pre-commit = "^2.5.1"
 
 [build-system]
-requires = [
-    "setuptools >= 41.0",
-    "setuptools_scm",
-    "wheel",
-]
-build-backend = "setuptools.build_meta"
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
 
 [tool.black]
 line-length = 88
@@ -56,4 +45,4 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 88
-known_third_party = ["classes", "colorlog", "constants", "driver", "pywintypes", "win32com", "win32con", "win32ui"]
+known_third_party = ["colorlog", "dmfo", "pywintypes", "win32com", "win32con", "win32ui"]
