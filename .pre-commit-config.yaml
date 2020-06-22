@@ -16,10 +16,10 @@ repos:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
 
-  - repo: https://github.com/mgedmin/check-manifest
-    rev: "0.42"
-    hooks:
-      - id: check-manifest
+  # - repo: https://github.com/mgedmin/check-manifest
+  #   rev: "0.42"
+  #   hooks:
+  #     - id: check-manifest
   - repo: https://github.com/asottile/seed-isort-config
     rev: v2.1.1
     hooks:
