@@ -45,7 +45,9 @@ def parse_args() -> argparse.Namespace:
         help="File log level",
     )
 
-    subparser = parser.add_subparsers(dest="mode", help="Choose driver to run:")
+    subparser = parser.add_subparsers(
+        dest="mode", title="Mode", required=True, help="Choose mode of operation:"
+    )
 
     diff_parser = subparser.add_parser("diff", help="diff driver")
     diff_parser.add_argument(
