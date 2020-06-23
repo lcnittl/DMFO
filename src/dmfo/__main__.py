@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple, Union
 
 import colorlog
 import dmfo.driver
-import dmfo.driver.common
+import dmfo.files
 from dmfo.classes import VCSFileData
 
 logger = logging.getLogger(__name__)
@@ -194,7 +194,7 @@ elif args.mode == "merge":
     FiledataMap["BASE"] = VCSFileData(args.BaseFileName)
 VCSFileData.target_ext = extension
 
-ret = dmfo.driver.common.preproc_files(filedata_map=FiledataMap)
+ret = dmfo.files.preproc(filedata_map=FiledataMap)
 if ret:
     sys.exit(ret)
 
@@ -203,7 +203,7 @@ if args.mode == "diff":
 elif args.mode == "merge":
     ret = dmfo.driver.merge(filedata_map=FiledataMap)
 
-dmfo.driver.common.postproc_files(filedata_map=FiledataMap, mode=args.mode)
+dmfo.files.postproc(filedata_map=FiledataMap, mode=args.mode)
 
 if ret <= 1:
     logger.debug("Removing log temp dir (%s)", TempDir)
