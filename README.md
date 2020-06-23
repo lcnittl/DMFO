@@ -6,11 +6,22 @@ started using COM automation, thus an Office installation is required.
 
 DMFO is LFS compatible.
 
-**Important:** DMFO is currently ported to Python. Legacy PowerShell scripts are located
-in [ps1][ps1] and may still be used. Please reregister DMFO in your Git config if you
-are updating from a pre-Python version (_vide infra_).
+**Important:** Legacy PowerShell scripts are located in [ps1][ps1] and may still be
+used. However, not all new features will be ported back to the ps1 scripts.
 
 ## Usage
+
+### Installation
+
+Installable with `pip` or [`pipx`][pipx] (recommended).
+
+```cmd
+pipx install https://github.com/lcnittl/DMFO.git@python
+```
+
+**Note:** As long as not merged into `master`, `@python` is required.
+
+**Note:** Adding [PyPI][pypi] support is planned.
 
 ### Git Integration
 
@@ -28,24 +39,25 @@ as usual and with any paramter they accept.
 
 #### `.gitconfig`
 
-Simply register the diff and merge drivers by running [`reg_dmfo_drivers.ps1`][register]
-(scope can be given as parameter `--local`, `--global` or `--system`, default is
-`--global`).
+Simply register the diff and merge drivers by running `dmfo install` (scope can be given
+as parameter `--local`, `--global` or `--system`, default is `--global`). **Note:** Not
+yet implemented.
 
 Alternatively, add the entries manually to your git config:
 
 ```ini
 [diff "dmfo"]
 	name = DMFO diff driver
-	command = "powershell.exe -File <pathToDMFO>/ps1/dmfo-diff.ps1"
+	command = dmfo diff
 	binary = true
 [merge "dmfo"]
 	name = DMFO merge driver
-	driver = "powershell.exe -File <pathToDMFO>/ps1/dmfo-merge.ps1 %O %A %B %L %P"
+	driver = dmfo merge %O %A %B %L %P
 	binary = true
 ```
 
-Replace `<pathToDMFO>` with the repo's path.
+Make sure that `dmfo`'s path is in your path variable, otherwise prepand `dmfo` with the
+executable's path.
 
 #### `.gitattributes`
 
@@ -87,5 +99,6 @@ Inspired by [ExtDiff][extdiff].
 
 [license]: LICENSE
 [extdiff]: https://github.com/ForNeVeR/ExtDiff
+[pipx]: https://pypi.org/project/pipx/
 [ps1]: ps1/
-[register]: ps1/reg_dmfo_drivers.ps1
+[pypi]: https://pypi.org/
