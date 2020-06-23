@@ -6,6 +6,7 @@ Diff and merge driver for Office documents. Opens files in MSO to compare them.
 import argparse
 import logging
 import logging.handlers
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -108,7 +109,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def setup_root_logger(path: Path = DEFAULT_LOG_PATH) -> logging.Logger:
-    global log_filename
+    global logfile_path
 
     logger = logging.getLogger()
     logger.setLevel(logging.NOTSET)
@@ -121,10 +122,10 @@ def setup_root_logger(path: Path = DEFAULT_LOG_PATH) -> logging.Logger:
         logging.getLogger(module).setLevel(loglevel)
     """
 
-    log_filename = Path(f"{Path(path) / Path(__file__).stem}.log")
-    log_roll = log_filename.is_file()
+    logfile_path = Path(f"{Path(path) / Path(__file__).stem}.log")
+    log_roll = logfile_path.is_file()
     file_handler = logging.handlers.RotatingFileHandler(
-        filename=log_filename, mode="a", backupCount=9, encoding="utf-8",
+        filename=logfile_path, mode="a", backupCount=9, encoding="utf-8",
     )
     if log_roll:
         file_handler.doRollover()
@@ -173,6 +174,9 @@ def setup_root_logger(path: Path = DEFAULT_LOG_PATH) -> logging.Logger:
 args = parse_args()
 TempDir = Path(tempfile.mkdtemp(prefix=f"dmfo_{args.mode}_"))
 root_logger = setup_root_logger(path=TempDir)
+logger.debug(
+    "DMFO is logging to '%s'", logfile_path,
+)
 
 FiledataMap = {
     "LOCAL": VCSFileData(args.LocalFileName),
@@ -201,12 +205,26 @@ elif args.mode == "merge":
 
 dmfo.driver.common.postproc_files(filedata_map=FiledataMap, mode=args.mode)
 
-if ret > 1:
+if ret <= 1:
+    logger.debug("Removing log temp dir (%s)", TempDir)
+
+    # Remove all file handlers
+    for handler in filter(
+        lambda handler: isinstance(
+            handler, (logging.FileHandler, logging.handlers.RotatingFileHandler)
+        ),
+        root_logger.handlers,
+    ):
+        handler.close()
+        root_logger.removeHandler(handler)
+
+    shutil.rmtree(TempDir)
+else:
     logger.critical(
         "DMFO %s exited with return code %s, check log for details (%s)",
         args.mode,
         ret,
-        log_filename.resolve(),
+        logfile_path,
     )
 sys.exit(ret)
 
