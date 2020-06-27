@@ -15,6 +15,7 @@ from typing import Dict, List, Tuple, Union
 import colorlog
 import dmfo.driver
 import dmfo.files
+import dmfo.installer
 from dmfo.classes import VCSFileData
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ def parse_args() -> argparse.Namespace:
         dest="mode", title="Mode", required=True, help="Choose mode of operation:"
     )
 
-    diff_parser = subparser.add_parser("diff", help="diff driver")
+    diff_parser = subparser.add_parser("diff", help="Run diff driver")
     diff_parser.add_argument(
         "DiffPath",
         # dest="TargetPath",
@@ -77,7 +78,7 @@ def parse_args() -> argparse.Namespace:
         "RemoteFileMode", type=str, help="new-mode", metavar="RFMode",
     )
 
-    merge_parser = subparser.add_parser("merge", help="merge driver")
+    merge_parser = subparser.add_parser("merge", help="Run merge driver")
     merge_parser.add_argument(
         "BaseFileName", type=Path, help="$BASE (%%O)", metavar="BFName",
     )
@@ -103,6 +104,16 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="$MERGED (%%P)",
         metavar="MDest",
+    )
+
+    install_parser = subparser.add_parser("install", help="Add DMFO to Git config")
+    install_parser.add_argument(
+        "scope",
+        default="global",
+        type=str.lower,
+        nargs="?",
+        choices=list("system", "global", "local", "worktree"),
+        help="Scope",
     )
 
     return parser.parse_args()
@@ -178,32 +189,35 @@ logger.debug(
     "DMFO is logging to '%s'", logfile_path,
 )
 
-FiledataMap = {
-    "LOCAL": VCSFileData(args.LocalFileName),
-    "REMOTE": VCSFileData(args.RemoteFileName),
-}
+if args.mode == "install":
+    ret = dmfo.installer.install(scope=args.scope)
+else:
+    FiledataMap = {
+        "LOCAL": VCSFileData(args.LocalFileName),
+        "REMOTE": VCSFileData(args.RemoteFileName),
+    }
 
-# extension = args.TargetPath.suffix
-if args.mode == "diff":
-    extension = args.DiffPath.suffix
-    logger.debug("Diffing '%s' file.", extension)
-elif args.mode == "merge":
-    extension = args.MergeDest.suffix
-    logger.debug("Merging '%s' file.", extension)
+    # extension = args.TargetPath.suffix
+    if args.mode == "diff":
+        extension = args.DiffPath.suffix
+        logger.debug("Diffing '%s' file.", extension)
+    elif args.mode == "merge":
+        extension = args.MergeDest.suffix
+        logger.debug("Merging '%s' file.", extension)
 
-    FiledataMap["BASE"] = VCSFileData(args.BaseFileName)
-VCSFileData.target_ext = extension
+        FiledataMap["BASE"] = VCSFileData(args.BaseFileName)
+    VCSFileData.target_ext = extension
 
-ret = dmfo.files.preproc(filedata_map=FiledataMap)
-if ret:
-    sys.exit(ret)
+    ret = dmfo.files.preproc(filedata_map=FiledataMap)
+    if ret:
+        sys.exit(ret)
 
-if args.mode == "diff":
-    ret = dmfo.driver.diff(filedata_map=FiledataMap)
-elif args.mode == "merge":
-    ret = dmfo.driver.merge(filedata_map=FiledataMap)
+    if args.mode == "diff":
+        ret = dmfo.driver.diff(filedata_map=FiledataMap)
+    elif args.mode == "merge":
+        ret = dmfo.driver.merge(filedata_map=FiledataMap)
 
-dmfo.files.postproc(filedata_map=FiledataMap, mode=args.mode)
+    dmfo.files.postproc(filedata_map=FiledataMap, mode=args.mode)
 
 if ret <= 1:
     logger.debug("Removing log temp dir (%s)", TempDir)

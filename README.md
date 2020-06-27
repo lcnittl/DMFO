@@ -40,8 +40,7 @@ as usual and with any paramter they accept.
 #### `.gitconfig`
 
 Simply register the diff and merge drivers by running `dmfo install` (scope can be given
-as parameter `--local`, `--global` or `--system`, default is `--global`). **Note:** Not
-yet implemented.
+by appending `system`, `global`, `local` or `worktree`, default is `global`).
 
 Alternatively, add the entries manually to your git config:
 
