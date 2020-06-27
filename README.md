@@ -93,10 +93,6 @@ GNU General Public License v3.0 or later
 
 See [LICENSE][license] for the full text.
 
----
-
-Inspired by [ExtDiff][extdiff].
-
 [license]: LICENSE
 [extdiff]: https://github.com/ForNeVeR/ExtDiff
 [pipx]: https://pypi.org/project/pipx/

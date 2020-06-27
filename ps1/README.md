@@ -1,9 +1,9 @@
-# DMFO -- Diff and Merge For Office
+# DMFO -- Diff and Merge For Office (Legacy PowerShell Edition)
 
 **Important:** This folder contains the legacy PowerShell scripts. This readme solely
 contains the differences in the setup of DMFO legacy PowerShell scripts. Please
 reregister DMFO in your Git config if you are updating from a pre-Python version (_vide
-infra_).
+infra_) to continue using DMFO PowerShell edition, or switch to DMFO python edition.
 
 ## Usage
 
@@ -34,6 +34,5 @@ Replace `<pathToDMFO>` with the repo's path.
 
 Inspired by [ExtDiff][extdiff].
 
-[license]: LICENSE
 [extdiff]: https://github.com/ForNeVeR/ExtDiff
 [register]: /ps1/reg_dmfo_drivers.ps1
