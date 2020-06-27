@@ -112,7 +112,7 @@ def parse_args() -> argparse.Namespace:
         default="global",
         type=str.lower,
         nargs="?",
-        choices=list("system", "global", "local", "worktree"),
+        choices=["system", "global", "local", "worktree"],
         help="Scope",
     )
 
