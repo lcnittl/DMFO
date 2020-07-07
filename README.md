@@ -16,10 +16,8 @@ used. However, not all new features will be ported back to the ps1 scripts.
 Installable with `pip` or [`pipx`][pipx] (recommended).
 
 ```cmd
-pipx install git+https://github.com/lcnittl/DMFO.git@python
+pipx install git+https://github.com/lcnittl/DMFO.git
 ```
-
-**Note:** As long as not merged into `master`, `@python` is required.
 
 **Note:** Adding [PyPI][pypi] support is planned.
 
