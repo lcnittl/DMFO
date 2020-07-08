@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def ask_resolved() -> bool:
     ret = win32ui.MessageBox(
-        f"Confirm conflict resolution for {22}?",
+        "Confirm conflict resolution?",
         "Merge Complete?",
         win32con.MB_YESNO | win32con.MB_ICONQUESTION,
     )
