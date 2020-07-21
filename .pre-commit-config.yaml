@@ -15,7 +15,6 @@ repos:
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
-
   # - repo: https://github.com/mgedmin/check-manifest
   #   rev: "0.42"
   #   hooks:
