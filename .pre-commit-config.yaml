@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.1.0
+    rev: v3.2.0
     hooks:
       - id: check-case-conflict
       - id: check-merge-conflict
@@ -11,7 +11,7 @@ repos:
       - id: check-yaml
       - id: requirements-txt-fixer
   - repo: https://github.com/prettier/prettier
-    rev: 2.0.5
+    rev: 2.1.1
     hooks:
       - id: prettier
         args: [--prose-wrap=always, --print-width=88]
@@ -20,14 +20,14 @@ repos:
   #   hooks:
   #     - id: check-manifest
   - repo: https://github.com/asottile/seed-isort-config
-    rev: v2.1.1
+    rev: v2.2.0
     hooks:
       - id: seed-isort-config
         name: isort seed config
         always_run: false
         types: [python]
   - repo: https://github.com/timothycrosley/isort
-    rev: 4.3.21
+    rev: 5.5.2
     hooks:
       - id: isort
         additional_dependencies:
@@ -38,11 +38,11 @@ repos:
       - id: bandit
         args: [--recursive, --quiet, --skip=B322]
   - repo: https://github.com/psf/black
-    rev: 19.10b0
+    rev: 20.8b1
     hooks:
       - id: black
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.2
+    rev: 3.8.3
     hooks:
       - id: flake8 # E***, W***, F***
         additional_dependencies:
