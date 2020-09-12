@@ -1,7 +1,8 @@
 # DMFO -- Diff and Merge For Office
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![Code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![Code style: black](https://img.shields.io/badge/code_style-black-000000)](https://github.com/psf/black)
+[![Code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4)](https://github.com/prettier/prettier)
 
 This is a set of scripts that enable convenient diff and merge of Office-related file
 types (currently Word and PowerPoint (diff only)). The office application will be
