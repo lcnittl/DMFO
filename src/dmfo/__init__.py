@@ -4,6 +4,7 @@ import logging.handlers
 import shutil
 import sys
 import tempfile
+from importlib import metadata
 from pathlib import Path
 
 import colorlog
@@ -11,6 +12,11 @@ import dmfo.driver
 import dmfo.files
 import dmfo.installer
 from dmfo.classes import VCSFileData
+
+try:
+    __version__ = metadata.version("dmfo")
+except metadata.PackageNotFoundError:
+    __version__ = None
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +26,12 @@ DEFAULT_LOG_PATH = Path(".")
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=str(__version__),
     )
 
     logging_grp = parser.add_argument_group(title="Logging")
