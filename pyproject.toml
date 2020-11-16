@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dmfo"
+name = "DMFO"
 version = "0.1.0"
 description = "Diff and Merge for Office."
 authors = ["Christian Knittl-Frank <lcnittl@gmail.com>"]

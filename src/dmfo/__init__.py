@@ -14,7 +14,7 @@ import dmfo.installer
 from dmfo.classes import VCSFileData
 
 try:
-    __version__ = metadata.version("dmfo")
+    __version__ = metadata.version("DMFO")
 except metadata.PackageNotFoundError:
     __version__ = None
 
