@@ -94,7 +94,8 @@ def wd(filedata_map: Dict[str, object]) -> int:
         logger.debug("Saving 'MERGE'")
         # TODO: progressbar
         filedata_map["MERGE"].fileobj.SaveAs(
-            FileName=str(filename), AddToRecentFiles=False,
+            FileName=str(filename),
+            AddToRecentFiles=False,
         )
         logger.debug("Done")
         # TODO: progressbar

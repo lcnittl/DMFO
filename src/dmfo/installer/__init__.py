@@ -25,7 +25,9 @@ def install(scope: str) -> int:
     for cmd in cmds:
         logger.debug("Executing: %s", cmd)
         ret = subprocess.run(  # nosec
-            shlex.split(cmd), stdout=sys.stdout, stderr=sys.stderr,
+            shlex.split(cmd),
+            stdout=sys.stdout,
+            stderr=sys.stderr,
         ).returncode
         if ret:
             logger.error("Returned: %s", ret)

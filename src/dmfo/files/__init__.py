@@ -30,7 +30,9 @@ def preproc(filedata_map: Dict[str, object]) -> int:
         logger.debug("Checking if is Git LFS pointer...")
         cmd = f"git lfs pointer --check --file '{filename}'"
         ret = subprocess.run(  # nosec
-            shlex.split(cmd), stdout=sys.stdout, stderr=sys.stderr,
+            shlex.split(cmd),
+            stdout=sys.stdout,
+            stderr=sys.stderr,
         ).returncode
         if ret == 0:
             logger.debug("Yes, is LFS pointer")
@@ -45,7 +47,9 @@ def preproc(filedata_map: Dict[str, object]) -> int:
                 + "'"
             )
             subprocess.run(  # nosec
-                shlex.split(cmd), stdout=sys.stdout, stderr=sys.stderr,
+                shlex.split(cmd),
+                stdout=sys.stdout,
+                stderr=sys.stderr,
             )
             if has_extension:
                 shutil.move(aux_filename, filename)
@@ -91,7 +95,9 @@ def postproc(filedata_map: Dict[str, object], mode: str) -> None:
                 + "'"
             )
             subprocess.run(  # nosec
-                shlex.split(cmd), stdout=sys.stdout, stderr=sys.stderr,
+                shlex.split(cmd),
+                stdout=sys.stdout,
+                stderr=sys.stderr,
             )
         else:
             logger.debug("Copying merged file...")

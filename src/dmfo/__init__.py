@@ -53,33 +53,60 @@ def parse_args() -> argparse.Namespace:
         metavar="DPath",
     )
     diff_parser.add_argument(
-        "LocalFileName", type=Path, help="old-file ($LOCAL)", metavar="LFName",
+        "LocalFileName",
+        type=Path,
+        help="old-file ($LOCAL)",
+        metavar="LFName",
     )
     diff_parser.add_argument(
-        "LocalFileHex", type=str, help="old-hex", metavar="LFHex",
+        "LocalFileHex",
+        type=str,
+        help="old-hex",
+        metavar="LFHex",
     )
     diff_parser.add_argument(
-        "LocalFileMode", type=str, help="old-mode", metavar="LFMode",
+        "LocalFileMode",
+        type=str,
+        help="old-mode",
+        metavar="LFMode",
     )
     diff_parser.add_argument(
-        "RemoteFileName", type=Path, help="new-file ($REMOTE)", metavar="RFName",
+        "RemoteFileName",
+        type=Path,
+        help="new-file ($REMOTE)",
+        metavar="RFName",
     )
     diff_parser.add_argument(
-        "RemoteFileHex", type=str, help="new-hex", metavar="RFHex",
+        "RemoteFileHex",
+        type=str,
+        help="new-hex",
+        metavar="RFHex",
     )
     diff_parser.add_argument(
-        "RemoteFileMode", type=str, help="new-mode", metavar="RFMode",
+        "RemoteFileMode",
+        type=str,
+        help="new-mode",
+        metavar="RFMode",
     )
 
     merge_parser = subparser.add_parser("merge", help="Run merge driver")
     merge_parser.add_argument(
-        "BaseFileName", type=Path, help="$BASE (%%O)", metavar="BFName",
+        "BaseFileName",
+        type=Path,
+        help="$BASE (%%O)",
+        metavar="BFName",
     )
     merge_parser.add_argument(
-        "LocalFileName", type=Path, help="$LOCAL (%%A)", metavar="LFName",
+        "LocalFileName",
+        type=Path,
+        help="$LOCAL (%%A)",
+        metavar="LFName",
     )
     merge_parser.add_argument(
-        "RemoteFileName", type=Path, help="$REMOTE (%%B)", metavar="RFName",
+        "RemoteFileName",
+        type=Path,
+        help="$REMOTE (%%B)",
+        metavar="RFName",
     )
     merge_parser.add_argument(
         "ConflictMarkerSize",
@@ -129,7 +156,10 @@ def setup_root_logger(path: Path = DEFAULT_LOG_PATH) -> logging.Logger:
     logfile_path = Path(f"{Path(path) / Path(__file__).stem}.log")
     log_roll = logfile_path.is_file()
     file_handler = logging.handlers.RotatingFileHandler(
-        filename=logfile_path, mode="a", backupCount=9, encoding="utf-8",
+        filename=logfile_path,
+        mode="a",
+        backupCount=9,
+        encoding="utf-8",
     )
     if log_roll:
         file_handler.doRollover()
@@ -190,7 +220,8 @@ def main():
     6: Unexpected pywin32 com_error
     """
     logger.debug(
-        "DMFO is logging to '%s'", logfile_path,
+        "DMFO is logging to '%s'",
+        logfile_path,
     )
 
     if args.mode == "install":
