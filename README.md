@@ -1,5 +1,7 @@
 # DMFO -- Diff and Merge For Office
 
+[![badge:pypi-version](https://img.shields.io/pypi/v/DMFO.svg)](https://pypi.org/project/DMFO)
+[![badge:py-versions](https://img.shields.io/pypi/pyversions/DMFO.svg)](https://pypi.org/project/DMFO)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/lcnittl/DMFO/master.svg)](https://results.pre-commit.ci/latest/github/lcnittl/DMFO/master)
 [![Code style: black](https://img.shields.io/badge/code_style-black-000000)](https://github.com/psf/black)
