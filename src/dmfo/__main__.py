@@ -3,6 +3,8 @@
 
 Diff and merge driver for Office documents. Opens files in MSO to compare them.
 """
-import dmfo
+import sys
 
-dmfo.main()
+from dmfo import main
+
+sys.exit(main())
