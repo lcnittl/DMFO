@@ -23,10 +23,14 @@ used. However, not all new features will be ported back to the ps1 scripts.
 Installable with `pip` or [`pipx`][pipx] (recommended).
 
 ```cmd
-pipx install git+https://github.com/lcnittl/DMFO.git
+pipx install DMFO
 ```
 
-**Note:** Adding [PyPI][pypi] support is planned.
+or
+
+```cmd
+pipx install git+https://github.com/lcnittl/DMFO.git
+```
 
 ### Git Integration
 
@@ -82,8 +86,6 @@ This option might be added at a later time.
 ## Reqirements
 
 - Git (for Windows)
-- Git LFS
-- Powershell (>=5.1)
 - Microsoft Office (\[and/or\]: Word, Powerpoint)
 
 ## Platform
