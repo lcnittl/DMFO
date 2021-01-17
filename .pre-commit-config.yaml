@@ -44,7 +44,7 @@ repos:
     rev: 1.7.0
     hooks:
       - id: bandit
-        args: [--recursive, --quiet, --skip=B322]
+        args: [--recursive, --quiet]
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.4
     hooks:
