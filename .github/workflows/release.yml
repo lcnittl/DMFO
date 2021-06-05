@@ -1,0 +1,21 @@
+# This workflow will create a release when a version tag ist pushed
+# For more information see: https://github.com/softprops/action-gh-release
+
+name: Create GitHub Release
+
+on:
+  push:
+    tags: "v*.*.*"
+
+jobs:
+  deploy:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }} # Private Acces Token
+          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Does not trigger release
