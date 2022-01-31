@@ -8,6 +8,7 @@ from importlib import metadata
 from pathlib import Path
 
 import colorlog
+
 import dmfo.driver
 import dmfo.files
 import dmfo.installer

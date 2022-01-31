@@ -6,6 +6,7 @@ import pywintypes  # win32com.client.pywintypes
 import win32com.client
 import win32con
 import win32ui
+
 from dmfo.constants.mso.wd import (
     WdCompareDestination,
     WdSaveOptions,
