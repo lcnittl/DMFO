@@ -1,25 +1,16 @@
+from __future__ import annotations
+
 import logging
-from pathlib import Path
-from typing import Dict
 
 import pywintypes  # win32com.client.pywintypes
-import win32com.client
-import win32con
-import win32ui
 
-from dmfo.classes import VCSFileData
-from dmfo.constants.mso.wd import (
-    WdCompareDestination,
-    WdSaveOptions,
-    WdUseFormattingFrom,
-    WdWindowState,
-)
+from dmfo.constants.mso.wd import WdCompareDestination, WdSaveOptions, WdWindowState
 from dmfo.driver.common import init_com_obj
 
 logger = logging.getLogger(__name__)
 
 
-def wd(filedata_map: Dict[str, object]) -> int:
+def wd(filedata_map: dict[str, object]) -> int:
     ret, COMObj = init_com_obj("Word")  # noqa: N806
     if ret:
         return ret
