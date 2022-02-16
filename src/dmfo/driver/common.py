@@ -1,13 +1,11 @@
+from __future__ import annotations
+
 import logging
-from pathlib import Path
-from typing import Tuple
 
 import pywintypes  # win32com.client.pywintypes
 import win32com.client
 import win32con
 import win32ui
-
-from dmfo.classes import VCSFileData
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +21,7 @@ def ask_resolved() -> bool:
     return ret == 6
 
 
-def init_com_obj(app_name: str) -> Tuple[int, object]:
+def init_com_obj(app_name: str) -> tuple[int, object]:
     logger.debug("Initializing COM object...")
     # TODO: progressbar
     try:

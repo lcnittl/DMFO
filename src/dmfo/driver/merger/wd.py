@@ -1,11 +1,8 @@
+from __future__ import annotations
+
 import logging
-from pathlib import Path
-from typing import Dict, List, Tuple, Union
 
 import pywintypes  # win32com.client.pywintypes
-import win32com.client
-import win32con
-import win32ui
 
 from dmfo.constants.mso.wd import (
     WdCompareDestination,
@@ -18,7 +15,7 @@ from dmfo.driver.common import ask_resolved, init_com_obj
 logger = logging.getLogger(__name__)
 
 
-def wd(filedata_map: Dict[str, object]) -> int:
+def wd(filedata_map: dict[str, object]) -> int:
     ret, COMObj = init_com_obj("Word")  # noqa: N806
     if ret:
         return ret
