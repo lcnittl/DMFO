@@ -7,6 +7,7 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
+      - id: check-json
       - id: check-toml
       - id: check-yaml
       - id: requirements-txt-fixer
@@ -14,12 +15,6 @@ repos:
     rev: v2.5.1
     hooks:
       - id: prettier
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-        additional_dependencies:
-          - toml
   - repo: https://github.com/asottile/setup-cfg-fmt
     rev: v1.20.0
     hooks:
@@ -28,18 +23,32 @@ repos:
     rev: v2.31.0
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
+        args: [--py38-plus]
+  ## <<< darker ##
+  ##  - repo: https://github.com/akaihola/darker
+  ##    rev: 1.4.0
+  ##    hooks:
+  ##    - id: darker
+  ##      args: ["--isort"] # TODO: Move to pyproject.toml
+  ##      additional_dependencies:
+  ##      - isort
+  ## === ##
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.10.1
+    hooks:
+      - id: isort
   - repo: https://github.com/psf/black
     rev: 22.1.0
     hooks:
-      - id: black
+      - id: black # black-jupyter
+  ## >>> black and isort ##
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.2
     hooks:
       - id: bandit
         args: [--recursive, --quiet]
-  - repo: https://github.com/PyCQA/flake8
-    rev: 4.0.1
+  - repo: https://gitlab.com/PyCQA/flake8
+    rev: 3.9.2
     hooks:
       - id: flake8 # E***, W***, F***
         additional_dependencies:

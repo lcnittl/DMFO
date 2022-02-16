@@ -1,11 +1,7 @@
 [flake8]
 max-line-length = 88
-max-complexity = 30
-ignore =
-    E203
-    E501
-    F401
-    F403
-    F405
-    W503
-    W605
+extend-ignore =
+    E203  # "Whitespace before ':'" - not PEP-8 compliant
+    E501  # "Line too long (82 >= 79 characters)"
+per-file-ignores =
+    __init__.py:F401
